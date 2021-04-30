@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     model = load_model(model_path, &model_len);
 
     printf("rknn_init ...\n");
-    ret = rknn_init(&ctx, model, model_len, 0);
+    ret = rknn_init(&ctx, model, model_len, 0, NULL);
     if(ret < 0) {
         printf("rknn_init fail! ret=%d\n", ret);
         return -1;

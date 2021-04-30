@@ -1,6 +1,6 @@
 /****************************************************************************
 *
-*    Copyright (c) 2017 - 2018 by Rockchip Corp.  All rights reserved.
+*    Copyright (c) 2017 - 2021 by Rockchip Corp.  All rights reserved.
 *
 *    The material in this file is confidential and contains trade secrets
 *    of Rockchip Corporation. This is proprietary information owned by
@@ -43,6 +43,9 @@ extern "C" {
    when enable, you can get detailed performance reports via rknn_query(ctx, RKNN_QUERY_PERF_DETAIL, ...),
    but it will reduce the frame rate. */
 #define RKNN_FLAG_COLLECT_PERF_MASK             0x00000008
+
+/* allocate all memory in outside, includes weight/internal/inputs/outputs */
+#define RKNN_FLAG_MEM_ALLOC_OUTSIDE             0x00000010
 
 /*
     Error code returned by the RKNN API.
@@ -92,6 +95,9 @@ typedef enum _rknn_query_cmd {
                                                            this query needs to be valid after rknn_outputs_get. */
     RKNN_QUERY_SDK_VERSION,                             /* query the sdk & driver version */
 
+    RKNN_QUERY_MEM_SIZE,                                /* query the weight & internal memory size */
+    RKNN_QUERY_CUSTOM_STRING,                           /* query the custom string */
+
     RKNN_QUERY_CMD_MAX
 } rknn_query_cmd;
 
@@ -104,6 +110,10 @@ typedef enum _rknn_tensor_type {
     RKNN_TENSOR_INT8,                                   /* data type is int8. */
     RKNN_TENSOR_UINT8,                                  /* data type is uint8. */
     RKNN_TENSOR_INT16,                                  /* data type is int16. */
+    RKNN_TENSOR_UINT16,                                 /* data type is uint16. */
+    RKNN_TENSOR_INT32,                                  /* data type is int32. */
+    RKNN_TENSOR_UINT32,                                 /* data type is uint32. */
+    RKNN_TENSOR_INT64,                                  /* data type is int64. */
 
     RKNN_TENSOR_TYPE_MAX
 } rknn_tensor_type;
@@ -116,6 +126,10 @@ inline const char* get_type_string(rknn_tensor_type type)
     case RKNN_TENSOR_INT8: return "INT8";
     case RKNN_TENSOR_UINT8: return "UINT8";
     case RKNN_TENSOR_INT16: return "INT16";
+    case RKNN_TENSOR_UINT16: return "UINT16";
+    case RKNN_TENSOR_INT32: return "INT32";
+    case RKNN_TENSOR_UINT32: return "UINT32";
+    case RKNN_TENSOR_INT64: return "UINT64";
     default: return "UNKNOW";
     }
 }
@@ -186,8 +200,18 @@ typedef struct _rknn_tensor_attr {
     rknn_tensor_type type;                              /* the data type of tensor. */
     rknn_tensor_qnt_type qnt_type;                      /* the quantitative type of tensor. */
     int8_t fl;                                          /* fractional length for RKNN_TENSOR_QNT_DFP. */
-    uint32_t zp;                                        /* zero point for RKNN_TENSOR_QNT_AFFINE_ASYMMETRIC. */
+    int32_t zp;                                         /* zero point for RKNN_TENSOR_QNT_AFFINE_ASYMMETRIC. */
     float scale;                                        /* scale for RKNN_TENSOR_QNT_AFFINE_ASYMMETRIC. */
+
+    uint32_t stride;                                    /* the stride of tensor, 0 means equal to width. */
+    uint32_t size_with_stride;                          /* the bytes size of tensor with stride. */
+
+    uint8_t pass_through;                               /* pass through mode, for rknn_set_io_mem interface.
+                                                           if TRUE, the buf data is passed directly to the input node of the rknn model
+                                                                    without any conversion. the following variables do not need to be set.
+                                                           if FALSE, the buf data is converted into an input consistent with the model
+                                                                     according to the following type and fmt. so the following variables
+                                                                     need to be set.*/
 } rknn_tensor_attr;
 
 /*
@@ -212,6 +236,34 @@ typedef struct _rknn_sdk_version {
     char api_version[256];                              /* the version of rknn api. */
     char drv_version[256];                              /* the version of rknn driver. */
 } rknn_sdk_version;
+
+/*
+    the information for RKNN_QUERY_MEM_SIZE.
+*/
+typedef struct _rknn_mem_size {
+    uint32_t total_weight_size;                         /* the weight memory size */
+    uint32_t total_internal_size;                       /* the internal memory size, exclude inputs/outputs */
+} rknn_mem_size;
+
+/*
+    the information for RKNN_QUERY_CUSTOM_STRING.
+*/
+typedef struct _rknn_custom_string {
+    char string[1024];                                  /* the string of custom, lengths max to 1024 bytes */
+} rknn_custom_string;
+
+/*
+    the memory information of tensor.
+*/
+typedef struct _rknn_tensor_memory {
+    void*            virt_addr;                         /* the virtual address of tensor buffer. */
+    uint64_t         phys_addr;                         /* the physical address of tensor buffer. */
+    int32_t          fd;                                /* the fd of tensor buffer. */
+    int32_t          offset;                            /* indicates the offset of the memory. */
+    uint32_t         size;                              /* the size of tensor buffer. */
+    uint32_t         flags;                             /* the flags of tensor buffer, reserved */
+    void *           priv_data;                         /* the private data of tensor buffer. */
+} rknn_tensor_mem;
 
 /*
     the input information for rknn_input_set.
@@ -248,10 +300,20 @@ typedef struct _rknn_output {
 } rknn_output;
 
 /*
+    the extend information for rknn_init.
+*/
+typedef struct _rknn_init_extend {
+    int32_t core_id;                                    /* npu core id */
+    uint8_t reserved[128];                              /* reserved */
+} rknn_init_extend;
+
+/*
     the extend information for rknn_run.
 */
 typedef struct _rknn_run_extend {
     uint64_t frame_id;                                  /* output parameter, indicate current frame id of run. */
+    int32_t non_block;                                  /* block flag of run, 0 is block else 1 is non block */
+    int32_t timeout_ms;                                 /* timeout for block mode, in milliseconds */
 } rknn_run_extend;
 
 /*
@@ -272,10 +334,11 @@ typedef struct _rknn_output_extend {
         void* model                 if size > 0, pointer to the rknn model, if size = 0, filepath to the rknn model.
         uint32_t size               the size of rknn model.
         uint32_t flag               extend flag, see the define of RKNN_FLAG_XXX_XXX.
+        rknn_init_extend* extend    the extend information of init.
     return:
         int                         error code.
 */
-int rknn_init(rknn_context* context, void* model, uint32_t size, uint32_t flag);
+int rknn_init(rknn_context* context, void* model, uint32_t size, uint32_t flag, rknn_init_extend* extend);
 
 
 /*  rknn_destroy
@@ -333,6 +396,19 @@ int rknn_inputs_set(rknn_context context, uint32_t n_inputs, rknn_input inputs[]
 int rknn_run(rknn_context context, rknn_run_extend* extend);
 
 
+/*  rknn_wait
+
+    wait the model after execute inference.
+
+    input:
+        rknn_context context        the handle of context.
+        rknn_run_extend* extend     the extend information of run.
+    return:
+        int                         error code.
+*/
+int rknn_wait(rknn_context context, rknn_run_extend* extend);
+
+
 /*  rknn_outputs_get
 
     wait the inference to finish and get the outputs.
@@ -364,6 +440,120 @@ int rknn_outputs_get(rknn_context context, uint32_t n_outputs, rknn_output outpu
         int                         error code
 */
 int rknn_outputs_release(rknn_context context, uint32_t n_ouputs, rknn_output outputs[]);
+
+
+/* new api for zero copy */
+
+/*  rknn_create_mem_from_phys (memory allocated outside)
+
+    initialize tensor memory from physical address.
+
+    input:
+        rknn_context ctx            the handle of context.
+        uint64_t phys_addr          physical address.
+        void *virt_addr             virtual address.
+        uint32_t size               the size of tensor buffer.
+    return:
+        rknn_tensor_mem             the pointer of tensor memory information.
+*/
+rknn_tensor_mem* rknn_create_mem_from_phys(rknn_context ctx, uint64_t phys_addr, void *virt_addr, uint32_t size);
+
+
+/*  rknn_create_mem_from_fd (memory allocated outside)
+
+    initialize tensor memory from file description.
+
+    input:
+        rknn_context ctx            the handle of context.
+        int32_t fd                  file description.
+        void *virt_addr             virtual address.
+        uint32_t size               the size of tensor buffer.
+        int32_t offset              indicates the offset of the memory (virt_addr without offset).
+    return:
+        rknn_tensor_mem             the pointer of tensor memory information.
+*/
+rknn_tensor_mem* rknn_create_mem_from_fd(rknn_context ctx, int32_t fd, void *virt_addr, uint32_t size, int32_t offset);
+
+
+/*  rknn_create_mem_from_mb_blk (memory allocated outside)
+
+    create tensor memory from mb_blk.
+
+    input:
+        rknn_context ctx            the handle of context.
+        void *mb_blk                mb_blk allocate from system api.
+        int32_t offset              indicates the offset of the memory.
+    return:
+        rknn_tensor_mem             the pointer of tensor memory information.
+*/
+rknn_tensor_mem* rknn_create_mem_from_mb_blk(rknn_context ctx, void *mb_blk, int32_t offset);
+
+
+/*  rknn_create_mem (memory allocated inside)
+
+    create tensor memory.
+
+    input:
+        rknn_context ctx            the handle of context.
+        uint32_t size               the size of tensor buffer.
+    return:
+        rknn_tensor_mem             the pointer of tensor memory information.
+*/
+rknn_tensor_mem* rknn_create_mem(rknn_context ctx, uint32_t size);
+
+
+/*  rknn_destory_mem (support allocate inside and outside)
+
+    destory tensor memory.
+
+    input:
+        rknn_context ctx            the handle of context.
+        rknn_tensor_mem *mem        the pointer of tensor memory information.
+    return:
+        int                         error code
+*/
+int rknn_destory_mem(rknn_context ctx, rknn_tensor_mem *mem);
+
+
+/*  rknn_set_weight_mem
+
+    set the weight memory.
+
+    input:
+        rknn_context ctx            the handle of context.
+        rknn_tensor_mem *mem        the array of tensor memory information
+    return:
+        int                         error code.
+*/
+int rknn_set_weight_mem(rknn_context ctx, rknn_tensor_mem *mem);
+
+
+/*  rknn_set_internal_mem
+
+    set the internal memory.
+
+    input:
+        rknn_context ctx            the handle of context.
+        rknn_tensor_mem *mem        the array of tensor memory information
+    return:
+        int                         error code.
+*/
+int rknn_set_internal_mem(rknn_context ctx, rknn_tensor_mem *mem);
+
+
+/*  rknn_set_io_mem
+
+    set the input and output tensors buffer.
+
+    input:
+        rknn_context ctx            the handle of context.
+        rknn_tensor_mem *mem        the array of tensor memory information.
+        rknn_tensor_attr *attr      the attribute of input or output tensor buffer.
+    return:
+        int                         error code.
+*/
+int rknn_set_io_mem(rknn_context ctx, rknn_tensor_mem *mem, rknn_tensor_attr *attr);
+
 
 #ifdef __cplusplus
 } //extern "C"

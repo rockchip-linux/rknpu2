@@ -131,12 +131,10 @@ int main(int argc, char** argv)
         printf("resize %d %d to %d %d\n", orig_img.cols, orig_img.rows, MODEL_IN_WIDTH, MODEL_IN_HEIGHT);
         cv::resize(orig_img, img, cv::Size(MODEL_IN_WIDTH, MODEL_IN_HEIGHT), (0, 0), (0, 0), cv::INTER_LINEAR);
     }
-
-    cv::cvtColor(img, img, COLOR_BGR2RGB);
     
     // Load RKNN Model
     model = load_model(model_path, &model_len);
-    ret = rknn_init(&ctx, model, model_len, 0);
+    ret = rknn_init(&ctx, model, model_len, 0, NULL);
     if(ret < 0) {
         printf("rknn_init fail! ret=%d\n", ret);
         return -1;

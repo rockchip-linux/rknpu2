@@ -6,7 +6,7 @@ GCC_COMPILER=aarch64-linux-gnu
 
 ROOT_PWD=$( cd "$( dirname $0 )" && cd -P "$( dirname "$SOURCE" )" && pwd )
 
-# build rockx
+# build
 BUILD_DIR=${ROOT_PWD}/build/build_linux_aarch64
 
 if [[ ! -d "${BUILD_DIR}" ]]; then
