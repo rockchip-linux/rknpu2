@@ -1,10 +1,11 @@
+下述<TARGET_PLATFORM>是RK356X或RK3588
 # Aarch64 Linux Demo
 ## build
 
-modify `GCC_COMPILER` on `build-linux.sh` for target platform, then execute
+modify `GCC_COMPILER` on `build-linux_<TARGET_PLATFORM>.sh` for target platform, then execute
 
 ```
-./build-linux.sh
+./build-linux_<TARGET_PLATFORM>.sh
 ```
 
 ## install
@@ -23,20 +24,19 @@ adb shell
 cd /userdata/rknn_api_demo_Linux/
 ```
 
-- rk3566/rk3568
 ```
 export LD_LIBRARY_PATH=./lib
-./rknn_create_mem_demo model/mobilenet_v1.rknn model/dog_224x224.jpg
-./rknn_create_mem_with_rga_demo model/mobilenet_v1.rknn model/dog_224x224.jpg
+./rknn_create_mem_demo model/<TARGET_PLATFORM>/mobilenet_v1.rknn model/dog_224x224.jpg
+./rknn_create_mem_with_rga_demo model/<TARGET_PLATFORM>/mobilenet_v1.rknn model/dog_224x224.jpg
 ```
 
 # Android Demo
 ## build
 
-modify `ANDROID_NDK_PATH` on `build-android.sh` for target platform, then execute
+modify `ANDROID_NDK_PATH` on `build-android_<TARGET_PLATFORM>.sh` for target platform, then execute
 
 ```
-./build-android.sh
+./build-android_<TARGET_PLATFORM>.sh
 ```
 
 ## install
@@ -55,14 +55,13 @@ adb shell
 cd /data/rknn_api_demo_Android/
 ```
 
-- rk3566/rk3568
 ```
 export LD_LIBRARY_PATH=./lib
-./rknn_create_mem_demo model/mobilenet_v1.rknn model/dog_224x224.jpg
-./rknn_create_mem_with_rga_demo model/mobilenet_v1.rknn model/dog_224x224.jpg
-./rknn_with_mmz_demo model/mobilenet_v1.rknn model/dog_224x224.jpg
-./rknn_set_internal_mem_from_fd_demo model/mobilenet_v1.rknn model/dog_224x224.jpg
-./rknn_set_internal_mem_from_phy_demo model/mobilenet_v1.rknn model/dog_224x224.jpg
+./rknn_create_mem_demo model/<TARGET_PLATFORM>/mobilenet_v1.rknn model/dog_224x224.jpg
+./rknn_create_mem_with_rga_demo model/<TARGET_PLATFORM>/mobilenet_v1.rknn model/dog_224x224.jpg
+./rknn_with_mmz_demo model/<TARGET_PLATFORM>/mobilenet_v1.rknn model/dog_224x224.jpg
+./rknn_set_internal_mem_from_fd_demo model/<TARGET_PLATFORM>/mobilenet_v1.rknn model/dog_224x224.jpg
+./rknn_set_internal_mem_from_phy_demo model/<TARGET_PLATFORM>/mobilenet_v1.rknn model/dog_224x224.jpg
 ```
 
 # Note

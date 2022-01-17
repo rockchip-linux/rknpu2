@@ -6,9 +6,15 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--allow-shlib-undefined")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wl,--allow-shlib-undefined")
 
 # rknn api
-set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../${CMAKE_SYSTEM_NAME}/librknn_api)
+if(TARGET_SOC STREQUAL "rk356x")
+  set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK356X/${CMAKE_SYSTEM_NAME}/librknn_api)
+elseif(TARGET_SOC STREQUAL "rk3588")
+  set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK3588/${CMAKE_SYSTEM_NAME}/librknn_api)
+else()
+  message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588")
+endif()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-  set(RKNN_API_LIB ${RKNN_API_PATH}/${CMAKE_ANDROID_ARCH_ABI}/librknn_api.so)
   set(RKNN_RT_LIB ${RKNN_API_PATH}/${CMAKE_ANDROID_ARCH_ABI}/librknnrt.so)
 else()
   if (CMAKE_C_COMPILER MATCHES "aarch64")
@@ -16,28 +22,21 @@ else()
   else()
     set(LIB_ARCH armhf)
   endif()
-  set(RKNN_API_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknn_api.so)
   set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
 endif()
 include_directories(${RKNN_API_PATH}/include)
-
-# opencv
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/OpenCV-android-sdk/sdk/native/jni/abi-${CMAKE_ANDROID_ARCH_ABI})
-else()
-  if(LIB_ARCH STREQUAL "lib")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-armhf/share/OpenCV)
-  else()
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-aarch64/share/OpenCV)
-  endif()
-endif()
-find_package(OpenCV REQUIRED)
 
 #stb
 include_directories(${CMAKE_SOURCE_DIR}/../3rdparty/)
 
 #rga
-set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga)
+if(TARGET_SOC STREQUAL "rk356x")
+  set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga/RK356X)
+elseif(TARGET_SOC STREQUAL "rk3588")
+  set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga/RK3588)
+else()
+  message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588")
+endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
   set(RGA_LIB ${RGA_PATH}/lib/Android/${CMAKE_ANDROID_ARCH_ABI}/librga.so)
 else()
@@ -72,8 +71,7 @@ add_executable(rknn_create_mem_demo
 )
 
 target_link_libraries(rknn_create_mem_demo
-	${RKNN_API_LIB}
-	${OpenCV_LIBS}
+	${RKNN_RT_LIB}
 )
 
 # install target and libraries
@@ -86,7 +84,7 @@ add_executable(rknn_create_mem_with_rga_demo
 )
 
 target_link_libraries(rknn_create_mem_with_rga_demo
-	${RKNN_API_LIB}
+	${RKNN_RT_LIB}
 	${RGA_LIB}
 )
 
@@ -104,7 +102,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
   )
 
   target_link_libraries(rknn_with_mmz_demo
-    ${RKNN_API_LIB}
+    ${RKNN_RT_LIB}
     ${MPI_MMZ_LIB}
   )
 
@@ -118,7 +116,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
   )
 
   target_link_libraries(rknn_set_internal_mem_from_fd_demo
-  ${RKNN_API_LIB}
+  ${RKNN_RT_LIB}
   ${MPI_MMZ_LIB}
   )
 
@@ -132,7 +130,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
   )
 
   target_link_libraries(rknn_set_internal_mem_from_phy_demo
-    ${RKNN_API_LIB}
+    ${RKNN_RT_LIB}
     ${MPI_MMZ_LIB}
   )
 
@@ -142,5 +140,5 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
 
 endif()
 
-install(PROGRAMS ${RKNN_API_LIB} DESTINATION lib)
+install(DIRECTORY model DESTINATION ./)
 install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)

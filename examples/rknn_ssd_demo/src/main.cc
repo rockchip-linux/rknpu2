@@ -37,10 +37,13 @@ using namespace cv;
                   Functions
 -------------------------------------------*/
 
-static void printRKNNTensor(rknn_tensor_attr *attr) {
-    printf("index=%d name=%s n_dims=%d dims=[%d %d %d %d] n_elems=%d size=%d fmt=%d type=%d qnt_type=%d fl=%d zp=%d scale=%f\n", 
-            attr->index, attr->name, attr->n_dims, attr->dims[3], attr->dims[2], attr->dims[1], attr->dims[0], 
-            attr->n_elems, attr->size, 0, attr->type, attr->qnt_type, attr->fl, attr->zp, attr->scale);
+static void dump_tensor_attr(rknn_tensor_attr* attr)
+{
+  printf("  index=%d, name=%s, n_dims=%d, dims=[%d, %d, %d, %d], n_elems=%d, size=%d, fmt=%s, type=%s, qnt_type=%s, "
+         "zp=%d, scale=%f\n",
+         attr->index, attr->name, attr->n_dims, attr->dims[0], attr->dims[1], attr->dims[2], attr->dims[3],
+         attr->n_elems, attr->size, get_format_string(attr->fmt), get_type_string(attr->type),
+         get_qnt_type_string(attr->qnt_type), attr->zp, attr->scale);
 }
 
 static unsigned char *load_model(const char *filename, int *model_size)
@@ -136,7 +139,7 @@ int main(int argc, char** argv)
             printf("rknn_query fail! ret=%d\n", ret);
             return -1;
         }
-        printRKNNTensor(&(input_attrs[i]));
+        dump_tensor_attr(&(input_attrs[i]));
     }
 
     printf("output tensors:\n");
@@ -149,7 +152,7 @@ int main(int argc, char** argv)
             printf("rknn_query fail! ret=%d\n", ret);
             return -1;
         }
-        printRKNNTensor(&(output_attrs[i]));
+        dump_tensor_attr(&(output_attrs[i]));
     }
 
     // Set Input Data

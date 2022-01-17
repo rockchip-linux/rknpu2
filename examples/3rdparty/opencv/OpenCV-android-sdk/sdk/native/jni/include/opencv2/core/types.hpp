@@ -859,6 +859,13 @@ public:
     */
     TermCriteria(int type, int maxCount, double epsilon);
 
+    inline bool isValid() const
+    {
+        const bool isCount = (type & COUNT) && maxCount > 0;
+        const bool isEps = (type & EPS) && !cvIsNaN(epsilon);
+        return isCount || isEps;
+    }
+
     int type; //!< the type of termination criteria: COUNT, EPS or COUNT + EPS
     int maxCount; //!< the maximum number of iterations/elements
     double epsilon; //!< the desired accuracy
@@ -1376,6 +1383,20 @@ Point_<_Tp> operator / (const Point_<_Tp>& a, double b)
 }
 
 
+template<typename _AccTp> static inline _AccTp normL2Sqr(const Point_<int>& pt);
+template<typename _AccTp> static inline _AccTp normL2Sqr(const Point_<int64>& pt);
+template<typename _AccTp> static inline _AccTp normL2Sqr(const Point_<float>& pt);
+template<typename _AccTp> static inline _AccTp normL2Sqr(const Point_<double>& pt);
+
+template<> inline int normL2Sqr<int>(const Point_<int>& pt) { return pt.dot(pt); }
+template<> inline int64 normL2Sqr<int64>(const Point_<int64>& pt) { return pt.dot(pt); }
+template<> inline float normL2Sqr<float>(const Point_<float>& pt) { return pt.dot(pt); }
+template<> inline double normL2Sqr<double>(const Point_<int>& pt) { return pt.dot(pt); }
+
+template<> inline double normL2Sqr<double>(const Point_<float>& pt) { return pt.ddot(pt); }
+template<> inline double normL2Sqr<double>(const Point_<double>& pt) { return pt.ddot(pt); }
+
+
 
 //////////////////////////////// 3D Point ///////////////////////////////
 
@@ -1863,8 +1884,11 @@ Rect_<_Tp>& operator += ( Rect_<_Tp>& a, const Size_<_Tp>& b )
 template<typename _Tp> static inline
 Rect_<_Tp>& operator -= ( Rect_<_Tp>& a, const Size_<_Tp>& b )
 {
-    a.width -= b.width;
-    a.height -= b.height;
+    const _Tp width = a.width - b.width;
+    const _Tp height = a.height - b.height;
+    CV_DbgAssert(width >= 0 && height >= 0);
+    a.width = width;
+    a.height = height;
     return a;
 }
 
@@ -1927,6 +1951,15 @@ template<typename _Tp> static inline
 Rect_<_Tp> operator + (const Rect_<_Tp>& a, const Size_<_Tp>& b)
 {
     return Rect_<_Tp>( a.x, a.y, a.width + b.width, a.height + b.height );
+}
+
+template<typename _Tp> static inline
+Rect_<_Tp> operator - (const Rect_<_Tp>& a, const Size_<_Tp>& b)
+{
+    const _Tp width = a.width - b.width;
+    const _Tp height = a.height - b.height;
+    CV_DbgAssert(width >= 0 && height >= 0);
+    return Rect_<_Tp>( a.x, a.y, width, height );
 }
 
 template<typename _Tp> static inline

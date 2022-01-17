@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
 
   // Allocate input memory in outside
   MB_BLK input_mb;
-  int    input_size = input_attrs[0].size;
+  int    input_size = input_attrs[0].size_with_stride;
   ret               = RK_MPI_MMZ_Alloc(&input_mb, input_size, mb_flags);
   if (ret < 0) {
     printf("RK_MPI_MMZ_Alloc failed, ret: %d\n", ret);
@@ -310,7 +310,7 @@ int main(int argc, char* argv[])
   for (uint32_t i = 0; i < io_num.n_output; ++i) {
     // default output type is depend on model, this require float32 to compute top5
     output_attrs[i].type = RKNN_TENSOR_FLOAT32;
-    int output_size      = output_attrs[i].size * sizeof(float);
+    int output_size      = output_attrs[i].n_elems * sizeof(float);
     output_attrs[i].size = output_size;
     ret                  = RK_MPI_MMZ_Alloc(&output_mbs[i], output_size, mb_flags);
     if (ret < 0) {
@@ -337,13 +337,14 @@ int main(int argc, char* argv[])
   input_attrs[0].type = input_type;
   // default fmt is NHWC, npu only support NHWC in zero copy mode
   input_attrs[0].fmt = input_layout;
-  input_mems[0]      = rknn_create_mem_from_phys(ctx, input_phys, input_virt, input_attrs[0].size);
+
+  input_mems[0] = rknn_create_mem_from_phys(ctx, input_phys, input_virt, input_attrs[0].size_with_stride);
 
   // Copy input data to input tensor memory
   int width  = input_attrs[0].dims[2];
   int stride = input_attrs[0].stride;
   if (width == stride) {
-    memcpy(input_mems[0]->virt_addr, input_data, input_attrs[0].size);
+    memcpy(input_mems[0]->virt_addr, input_data, width*input_attrs[0].dims[1]*input_attrs[0].dims[3]);
   } else {
     int height  = input_attrs[0].dims[1];
     int channel = input_attrs[0].dims[3];

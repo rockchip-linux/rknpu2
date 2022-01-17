@@ -125,6 +125,30 @@ static unsigned char* load_image(const char* image_path, rknn_tensor_attr* input
   return image_data;
 }
 
+static unsigned char *load_model(const char *filename, int *model_size)
+{
+    FILE *fp = fopen(filename, "rb");
+    if(fp == nullptr) {
+        printf("fopen %s fail!\n", filename);
+        return NULL;
+    }
+    fseek(fp, 0, SEEK_END);
+    int model_len = ftell(fp);
+    unsigned char *model = (unsigned char*)malloc(model_len);
+    fseek(fp, 0, SEEK_SET);
+    if(model_len != fread(model, 1, model_len, fp)) {
+        printf("fread %s fail!\n", filename);
+        free(model);
+        return NULL;
+    }
+    *model_size = model_len;
+    if(fp) {
+        fclose(fp);
+    }
+    return model;
+}
+
+
 /*-------------------------------------------
                   Main Functions
 -------------------------------------------*/
@@ -146,7 +170,9 @@ int main(int argc, char* argv[])
   rknn_context ctx = 0;
 
   // Load RKNN Model
-  int ret = rknn_init(&ctx, model_path, 0, 0, NULL);
+  int model_len = 0;
+  unsigned char *model = load_model(model_path, &model_len);
+  int ret = rknn_init(&ctx, model, model_len, 0, NULL);
   if (ret < 0) {
     printf("rknn_init fail! ret=%d\n", ret);
     return -1;
@@ -231,8 +257,9 @@ int main(int argc, char* argv[])
   // Copy input data to input tensor memory
   int width  = input_attrs[0].dims[2];
   int stride = input_attrs[0].stride;
+
   if (width == stride) {
-    memcpy(input_mems[0]->virt_addr, input_data, input_attrs[0].size);
+    memcpy(input_mems[0]->virt_addr, input_data, width*input_attrs[0].dims[1]*input_attrs[0].dims[3]);
   } else {
     int height  = input_attrs[0].dims[1];
     int channel = input_attrs[0].dims[3];
@@ -252,7 +279,10 @@ int main(int argc, char* argv[])
   // Create output tensor memory
   rknn_tensor_mem* output_mems[io_num.n_output];
   for (uint32_t i = 0; i < io_num.n_output; ++i) {
-    output_mems[i] = rknn_create_mem(ctx, output_attrs[i].size_with_stride);
+    // default output type is depend on model, this require float32 to compute top5
+    // allocate float32 output tensor
+    int output_size = output_attrs[i].n_elems * sizeof(float);
+    output_mems[i]  = rknn_create_mem(ctx, output_size);
   }
 
   // Set input tensor memory
@@ -313,7 +343,13 @@ int main(int argc, char* argv[])
   // destory
   rknn_destroy(ctx);
 
-  free(input_data);
+  if (input_data != nullptr) {
+    free(input_data);
+  }
+
+  if (model != nullptr) {
+    free(model);
+  }
 
   return 0;
 }
