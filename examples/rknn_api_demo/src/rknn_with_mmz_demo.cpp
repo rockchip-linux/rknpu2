@@ -280,7 +280,7 @@ int main(int argc, char* argv[])
 
   // Copy input data to input tensor memory
   int width  = input_attrs[0].dims[2];
-  int stride = input_attrs[0].stride;
+  int stride = input_attrs[0].w_stride;
   if (width == stride) {
     memcpy(input_mems[0]->virt_addr, input_data, width*input_attrs[0].dims[1]*input_attrs[0].dims[3]);
   } else {
@@ -358,13 +358,13 @@ int main(int argc, char* argv[])
     RK_MPI_MMZ_Free(output_mbs[i]);
   }
 
-  // Destory rknn memory
-  rknn_destory_mem(ctx, input_mems[0]);
+  // Destroy rknn memory
+  rknn_destroy_mem(ctx, input_mems[0]);
   for (uint32_t i = 0; i < io_num.n_output; ++i) {
-    rknn_destory_mem(ctx, output_mems[i]);
+    rknn_destroy_mem(ctx, output_mems[i]);
   }
 
-  // destory
+  // destroy
   rknn_destroy(ctx);
 
   free(input_data);

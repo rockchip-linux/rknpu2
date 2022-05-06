@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
   // release outputs
   ret = rknn_outputs_release(ctx, io_num.n_output, outputs);
 
-  // destory
+  // destroy
   rknn_destroy(ctx);
 
   for (int i = 0; i < io_num.n_input; i++)

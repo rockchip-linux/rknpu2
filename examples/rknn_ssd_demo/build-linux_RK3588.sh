@@ -10,12 +10,7 @@ then
 fi
 
 # for aarch64
-if [ -f "${TOOL_CHAIN}/bin/aarch64-linux-gcc" ]
-then
-  GCC_COMPILER=${TOOL_CHAIN}/bin/aarch64-linux
-else
-  GCC_COMPILER=${TOOL_CHAIN}/bin/aarch64-linux-gnu
-fi
+GCC_COMPILER=aarch64-linux-gnu
 
 export LD_LIBRARY_PATH=${TOOL_CHAIN}/lib64:$LD_LIBRARY_PATH
 export CC=${GCC_COMPILER}-gcc

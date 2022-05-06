@@ -212,6 +212,8 @@ int main(int argc, char** argv)
 
     imwrite("./out.jpg", orig_img);
 
+    deinitPostProcessSSD();
+
     // Release
     if(ctx >= 0) {
         rknn_destroy(ctx);

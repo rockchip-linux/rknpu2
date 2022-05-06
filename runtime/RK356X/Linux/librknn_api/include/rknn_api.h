@@ -94,21 +94,27 @@ typedef uint64_t rknn_context;
     The query command for rknn_query
 */
 typedef enum _rknn_query_cmd {
-    RKNN_QUERY_IN_OUT_NUM = 0,                          /* query the number of input & output tensor. */
-    RKNN_QUERY_INPUT_ATTR,                              /* query the attribute of input tensor. */
-    RKNN_QUERY_OUTPUT_ATTR,                             /* query the attribute of output tensor. */
-    RKNN_QUERY_PERF_DETAIL,                             /* query the detail performance, need set
-                                                           RKNN_FLAG_COLLECT_PERF_MASK when call rknn_init,
-                                                           this query needs to be valid after rknn_outputs_get. */
-    RKNN_QUERY_PERF_RUN,                                /* query the time of run,
-                                                           this query needs to be valid after rknn_outputs_get. */
-    RKNN_QUERY_SDK_VERSION,                             /* query the sdk & driver version */
+    RKNN_QUERY_IN_OUT_NUM = 0,                              /* query the number of input & output tensor. */
+    RKNN_QUERY_INPUT_ATTR = 1,                              /* query the attribute of input tensor. */
+    RKNN_QUERY_OUTPUT_ATTR = 2,                             /* query the attribute of output tensor. */
+    RKNN_QUERY_PERF_DETAIL = 3,                             /* query the detail performance, need set
+                                                               RKNN_FLAG_COLLECT_PERF_MASK when call rknn_init,
+                                                               this query needs to be valid after rknn_outputs_get. */
+    RKNN_QUERY_PERF_RUN = 4,                                /* query the time of run,
+                                                               this query needs to be valid after rknn_outputs_get. */
+    RKNN_QUERY_SDK_VERSION = 5,                             /* query the sdk & driver version */
 
-    RKNN_QUERY_MEM_SIZE,                                /* query the weight & internal memory size */
-    RKNN_QUERY_CUSTOM_STRING,                           /* query the custom string */
+    RKNN_QUERY_MEM_SIZE = 6,                                /* query the weight & internal memory size */
+    RKNN_QUERY_CUSTOM_STRING = 7,                           /* query the custom string */
 
-    RKNN_QUERY_NATIVE_INPUT_ATTR,                       /* query the attribute of native input tensor. */
-    RKNN_QUERY_NATIVE_OUTPUT_ATTR,                      /* query the attribute of native output tensor. */
+    RKNN_QUERY_NATIVE_INPUT_ATTR = 8,                       /* query the attribute of native input tensor. */
+    RKNN_QUERY_NATIVE_OUTPUT_ATTR = 9,                      /* query the attribute of native output tensor. */
+
+    RKNN_QUERY_NATIVE_NC1HWC2_INPUT_ATTR = 8,               /* query the attribute of native input tensor. */
+    RKNN_QUERY_NATIVE_NC1HWC2_OUTPUT_ATTR = 9,              /* query the attribute of native output tensor. */
+
+    RKNN_QUERY_NATIVE_NHWC_INPUT_ATTR = 10,                 /* query the attribute of native input tensor. */
+    RKNN_QUERY_NATIVE_NHWC_OUTPUT_ATTR = 11,                /* query the attribute of native output tensor. */
 
     RKNN_QUERY_CMD_MAX
 } rknn_query_cmd;
@@ -131,7 +137,7 @@ typedef enum _rknn_tensor_type {
     RKNN_TENSOR_TYPE_MAX
 } rknn_tensor_type;
 
-inline const char* get_type_string(rknn_tensor_type type)
+inline static const char* get_type_string(rknn_tensor_type type)
 {
     switch(type) {
     case RKNN_TENSOR_FLOAT32: return "FP32";
@@ -159,7 +165,7 @@ typedef enum _rknn_tensor_qnt_type {
     RKNN_TENSOR_QNT_MAX
 } rknn_tensor_qnt_type;
 
-inline const char* get_qnt_type_string(rknn_tensor_qnt_type type)
+inline static const char* get_qnt_type_string(rknn_tensor_qnt_type type)
 {
     switch(type) {
     case RKNN_TENSOR_QNT_NONE: return "NONE";
@@ -195,7 +201,7 @@ typedef enum _rknn_core_mask {
     RKNN_NPU_CORE_UNDEFINED,
 } rknn_core_mask;
 
-inline const char* get_format_string(rknn_tensor_format fmt)
+inline static const char* get_format_string(rknn_tensor_format fmt)
 {
     switch(fmt) {
     case RKNN_TENSOR_NCHW: return "NCHW";
@@ -235,7 +241,8 @@ typedef struct _rknn_tensor_attr {
     int32_t zp;                                         /* zero point for RKNN_TENSOR_QNT_AFFINE_ASYMMETRIC. */
     float scale;                                        /* scale for RKNN_TENSOR_QNT_AFFINE_ASYMMETRIC. */
 
-    uint32_t stride;                                    /* the stride of tensor, 0 means equal to width. */
+    uint32_t w_stride;                                  /* the stride of tensor along the width dimention of input,
+                                                           Note: it is read-only, 0 means equal to width. */
     uint32_t size_with_stride;                          /* the bytes size of tensor with stride. */
 
     uint8_t pass_through;                               /* pass through mode, for rknn_set_io_mem interface.
@@ -244,6 +251,8 @@ typedef struct _rknn_tensor_attr {
                                                            if FALSE, the buf data is converted into an input consistent with the model
                                                                      according to the following type and fmt. so the following variables
                                                                      need to be set.*/
+    uint32_t h_stride;                                  /* the stride along the height dimention of input,
+                                                           Note: it is write-only, if it was set to 0, h_stride = height. */
 } rknn_tensor_attr;
 
 /*
@@ -288,8 +297,8 @@ typedef struct _rknn_custom_string {
    The flags of rknn_tensor_mem.
 */
 typedef enum _rknn_tensor_mem_flags {
-    RKNN_TENSOR_MEMORY_FLAGS_ALLOC_INSIDE = 1,           /*Used to mark in rknn_destory_mem() whether it is necessary to release the "mem" pointer itself.
-                                                         If the flag RKNN_TENSOR_MEMORY_FLAGS_ALLOC_INSIDE is set, rknn_destory_mem() will call free(mem).*/
+    RKNN_TENSOR_MEMORY_FLAGS_ALLOC_INSIDE = 1,           /*Used to mark in rknn_destroy_mem() whether it is necessary to release the "mem" pointer itself.
+                                                         If the flag RKNN_TENSOR_MEMORY_FLAGS_ALLOC_INSIDE is set, rknn_destroy_mem() will call free(mem).*/
     RKNN_TENSOR_MEMORY_FLAGS_UNKNOWN
 } rknn_tensor_mem_flags;
 
@@ -573,9 +582,9 @@ rknn_tensor_mem* rknn_create_mem_from_mb_blk(rknn_context ctx, void *mb_blk, int
 rknn_tensor_mem* rknn_create_mem(rknn_context ctx, uint32_t size);
 
 
-/*  rknn_destory_mem (support allocate inside and outside)
+/*  rknn_destroy_mem (support allocate inside and outside)
 
-    destory tensor memory.
+    destroy tensor memory.
 
     input:
         rknn_context ctx            the handle of context.
@@ -583,7 +592,7 @@ rknn_tensor_mem* rknn_create_mem(rknn_context ctx, uint32_t size);
     return:
         int                         error code
 */
-int rknn_destory_mem(rknn_context ctx, rknn_tensor_mem *mem);
+int rknn_destroy_mem(rknn_context ctx, rknn_tensor_mem *mem);
 
 
 /*  rknn_set_weight_mem

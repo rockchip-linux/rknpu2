@@ -85,6 +85,8 @@ int readLines(const char *fileName, char *lines[], int max_line)
 		lines[i++] = s;
         if (i >= max_line) break;
 	}
+
+    fclose(file);
 	return i;
 }
 
@@ -117,6 +119,11 @@ int loadBoxPriors(const char* locationFilename, float (*boxPriors)[NUM_RESULTS])
             return -1;
         }
     }
+
+    for (int i=0; i<4; i++) {
+        free(lines[i]);
+    }    
+
     return 0;
 }
 
@@ -348,4 +355,14 @@ int postProcessSSD(float * predictions, float *output_classes, int width, int he
 
     group->count = last_count;
     return 0;
+}
+
+void deinitPostProcessSSD() {
+
+    for (int i=0; i<NUM_CLASS; i++) {
+        if(labels[i] != nullptr) {
+            free(labels[i]);
+            labels[i] = nullptr;
+        }
+    }
 }

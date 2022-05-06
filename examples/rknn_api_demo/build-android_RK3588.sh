@@ -2,12 +2,14 @@
 
 set -e
 
-ANDROID_NDK_PATH=~/opt/tool_chain/android-ndk-r17
+if [ -z ${ANDROID_NDK_PATH} ]
+then
+  ANDROID_NDK_PATH=~/opt/tool_chain/android-ndk-r17
+fi
 
 BUILD_TYPE=Release
 
 TARGET_SOC="rk3588"
-
 
 ROOT_PWD=$( cd "$( dirname $0 )" && cd -P "$( dirname "$SOURCE" )" && pwd )
 

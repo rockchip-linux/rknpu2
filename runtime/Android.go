@@ -7,6 +7,11 @@ import (
     "strings"
 )
 
+var SUPPORT_TARGET_PLATFORM = [...]string{
+    "rk356x",
+    "rk3588",
+}
+
 func init() {
     fmt.Println("librknnrt want to conditional Compile")
     android.RegisterModuleType("cc_librknnrt_prebuilt_library_shared", LibrknnrtFactory)
@@ -57,13 +62,30 @@ func LibrknnrtPrebuiltLibrary(ctx android.LoadHookContext) {
 //     ctx.AppendProperties(p)
 // }
 
+func checkEnabled(ctx android.LoadHookContext) bool {
+    var soc string = getTargetSoc(ctx)
+    for i := 0; i < len(SUPPORT_TARGET_PLATFORM); i++ {
+        if (strings.EqualFold(SUPPORT_TARGET_PLATFORM[i], soc)) {
+            fmt.Println("librknnrt enabled on " + soc)
+            return true
+        }
+    }
+    fmt.Println("librknnrt disabled on " + soc)
+    return false
+}
+
 func getLibrknnrtLibrary(ctx android.LoadHookContext, arch string) ([]string) {
     var src []string
     var soc string = getTargetSoc(ctx)
+    var prefix string = soc
+
+    if (!checkEnabled(ctx)) {
+        prefix = "RK356X"
+    }
 
     // fmt.Println("soc=" + soc + " arch=" + arch)
 
-    src = append(src, soc + "/Android/librknn_api/" + arch + "/librknnrt.so")
+    src = append(src, prefix + "/Android/librknn_api/" + arch + "/librknnrt.so")
 
     return src
 }
@@ -71,8 +93,13 @@ func getLibrknnrtLibrary(ctx android.LoadHookContext, arch string) ([]string) {
 func getLibrknnrtHeader(ctx android.LoadHookContext) ([]string) {
     var src []string
     var soc string = getTargetSoc(ctx)
+    var prefix string = soc
 
-    src = append(src, soc + "/Android/librknn_api/include/")
+    if (!checkEnabled(ctx)) {
+        prefix = "RK356X"
+    }
+
+    src = append(src, prefix + "/Android/librknn_api/include/")
 
     return src
 }

@@ -27,3 +27,14 @@ cc_librknnrt_prebuilt_library_shared {
     check_elf_files: false,
     vendor: true,
 }
+
+cc_rockchip_prebuilt_binary {
+    name: "rknn_server",
+    init_rc: ["init.rknn_server.rc"],
+    strip: {
+        none: true,
+    },
+    check_elf_files: false,
+    vendor: true,
+    npu: true,
+}

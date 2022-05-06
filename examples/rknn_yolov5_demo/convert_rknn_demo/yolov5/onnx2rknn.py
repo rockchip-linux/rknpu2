@@ -23,7 +23,7 @@ if __name__ == '__main__':
     RKNN_MODEL_PATH = './{}/{}_rm_transpose.rknn'.format(OUT_DIR,exp+'-'+str(Width)+'-'+str(Height))
     if NEED_BUILD_MODEL:
         DATASET = './dataset.txt'
-        rknn.config(mean_values=[[0, 0, 0]], std_values=[[255, 255, 255]],output_tensor_type="int8")
+        rknn.config(mean_values=[[0, 0, 0]], std_values=[[255, 255, 255]], target_platform="rk3588")
         # Load model
         print('--> Loading model')
         ret = rknn.load_onnx(MODEL_PATH)

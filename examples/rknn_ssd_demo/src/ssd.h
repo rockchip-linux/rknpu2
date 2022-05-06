@@ -53,6 +53,8 @@ int loadBoxPriors(const char* locationFilename, float (*boxPriors)[NUM_RESULTS])
 
 int postProcessSSD(float * predictions, float *output_classes, int width, int heigh, detect_result_group_t *group);
 
+void deinitPostProcessSSD();
+
 int64_t getCurrentTimeUs();
 
 #endif

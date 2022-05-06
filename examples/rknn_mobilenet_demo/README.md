@@ -1,5 +1,7 @@
 下述<TARGET_PLATFORM>是RK356X或RK3588
+
 # Aarch64 Linux Demo
+
 ## build
 
 modify `GCC_COMPILER` on `build-linux_<TARGET_PLATFORM>.sh` for target platform,
@@ -31,6 +33,7 @@ export LD_LIBRARY_PATH=./lib
 ```
 
 # Android Demo
+
 ## build
 
 modify `ANDROID_NDK_PATH` on `build-android_<TARGET_PLATFORM>.sh` for target platform, then execute

@@ -2,15 +2,24 @@
   RKNPU2 provides an advanced interface to access Rockchip NPU.
 
 ## Support Platform
-  - RK3566
-  - RK3568
-  - RK3588
-  - RK3588S
+  - RK3566/RK3568
+  - RK3588/RK3588S
+  - RV1103/RV1106
 
 Note: The content of this project is not applicable to RK1808/RV1109/RV1126/RK3399Pro.
       The rknn model must be generated using RKNN Toolkit 2 instead of RKNN Toolkit.
 
 ## ReleaseLog
+
+### 1.3.0
+
+- Support RV1103/RV1106（Beta SDK）
+- rknn_tensor_attr support w_stride(rename from stride) and h_stride
+- Rename rknn_destroy_mem()
+- Support more NPU operators, such as Where, Resize, Pad, Reshape, Transpose etc.
+- RK3588 support multi-batch multi-core mode
+- When RKNN_LOG_LEVEL=4, it supports to display the MACs utilization and bandwidth occupation of each layer.
+- Bug fix
 
 ### 1.2.0
 

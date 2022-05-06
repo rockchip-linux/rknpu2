@@ -25,6 +25,7 @@ else()
   set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
 endif()
 include_directories(${RKNN_API_PATH}/include)
+include_directories(${CMAKE_SOURCE_DIR}/../3rdparty)
 
 # opencv
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
@@ -41,16 +42,17 @@ find_package(OpenCV REQUIRED)
 set(CMAKE_INSTALL_RPATH "lib")
 
 add_executable(rknn_mobilenet_demo
-        src/main.cc
+    src/main.cc
 )
 
 target_link_libraries(rknn_mobilenet_demo
-	${RKNN_RT_LIB}
-	${OpenCV_LIBS}
+  ${RKNN_RT_LIB}
+  ${OpenCV_LIBS}
 )
 
 # install target and libraries
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_mobilenet_demo_${CMAKE_SYSTEM_NAME})
 install(TARGETS rknn_mobilenet_demo DESTINATION ./)
+
 install(DIRECTORY model DESTINATION ./)
 install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)

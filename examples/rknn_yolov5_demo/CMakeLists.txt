@@ -18,7 +18,7 @@ if(TARGET_SOC STREQUAL "rk356x")
 elseif(TARGET_SOC STREQUAL "rk3588")
   set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK3588/${CMAKE_SYSTEM_NAME}/librknn_api)
 else()
-  message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588")
+  message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588 or rv110x")
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
@@ -32,6 +32,7 @@ else()
   set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
 endif()
 include_directories(${RKNN_API_PATH}/include)
+include_directories(${CMAKE_SOURCE_DIR}/../3rdparty)
 
 # opencv
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
@@ -65,21 +66,27 @@ else()
 endif()
 include_directories( ${RGA_PATH}/include)
 
-
+set(CMAKE_INSTALL_RPATH "lib")
 
 # rknn_yolov5_demo
 include_directories( ${CMAKE_SOURCE_DIR}/include)
+
 add_executable(rknn_yolov5_demo
         src/main.cc
         src/postprocess.cc
 )
 
 target_link_libraries(rknn_yolov5_demo
-	${RKNN_RT_LIB}
+  ${RKNN_RT_LIB}
   ${RGA_LIB}
   ${OpenCV_LIBS}
 )
 
+
+# install target and libraries
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_yolov5_demo_${CMAKE_SYSTEM_NAME})
 install(TARGETS rknn_yolov5_demo DESTINATION ./)
+
 install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)
+install(PROGRAMS ${RGA_LIB} DESTINATION lib)
 install(DIRECTORY model DESTINATION ./)

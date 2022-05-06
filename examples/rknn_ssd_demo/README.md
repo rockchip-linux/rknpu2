@@ -28,7 +28,7 @@ cd /userdata/rknn_ssd_demo_Linux/
 - rk3566/rk3568
 ```
 export LD_LIBRARY_PATH=./lib
-./rknn_ssd_demo model/<TARGET_PLATFORM>/ssd_inception_v2.rknn model/road.bmp
+./rknn_ssd_demo model/<TARGET_PLATFORM>/ssd_inception_v2.rknn model/bus.jpg
 ```
 
 
@@ -58,5 +58,5 @@ cd /data/rknn_ssd_demo_Android/
 
 ```
 export LD_LIBRARY_PATH=./lib
-./rknn_ssd_demo model/_<TARGET_PLATFORM>/ssd_inception_v2.rknn model/road.bmp
+./rknn_ssd_demo model/_<TARGET_PLATFORM>/ssd_inception_v2.rknn model/bus.jpg
 ```

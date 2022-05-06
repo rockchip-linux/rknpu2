@@ -1,14 +1,16 @@
-/****************************************************************************
- *
- *    Copyright (c) 2017 - 2018 by Rockchip Corp.  All rights reserved.
- *
- *    The material in this file is confidential and contains trade secrets
- *    of Rockchip Corporation. This is proprietary information owned by
- *    Rockchip Corporation. No part of this work may be disclosed,
- *    reproduced, copied, transmitted, or used in any way for any purpose,
- *    without the express written permission of Rockchip Corporation.
- *
- *****************************************************************************/
+// Copyright (c) 2021 by Rockchip Electronics Co., Ltd. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 /*-------------------------------------------
                 Includes
@@ -162,7 +164,6 @@ int main(int argc, char* argv[])
   rknn_tensor_format input_layout = RKNN_TENSOR_NHWC;
 
   // Load image
-  //input_data = load_image(input_path, &input_attrs[0]);
   int req_height  = 0;
   int req_width   = 0;
   int req_channel = 0;
@@ -194,7 +195,11 @@ int main(int argc, char* argv[])
       return -1;
   }
 
-  cv::Mat img = orig_img.clone();
+  // if origin model is from Caffe, you maybe not need do BGR2RGB.
+  cv::Mat orig_img_rgb;
+  cv::cvtColor(orig_img, orig_img_rgb, cv::COLOR_BGR2RGB);
+
+  cv::Mat img = orig_img_rgb.clone();
   if(orig_img.cols != req_width || orig_img.rows != req_height) {
       printf("resize %d %d to %d %d\n", orig_img.cols, orig_img.rows, req_width, req_height);
       cv::resize(orig_img, img, cv::Size(req_width, req_height), (0, 0), (0, 0), cv::INTER_LINEAR);
@@ -216,7 +221,7 @@ int main(int argc, char* argv[])
 
   // Copy input data to input tensor memory
   width  = input_attrs[0].dims[2];
-  int stride = input_attrs[0].stride;
+  int stride = input_attrs[0].w_stride;
 
   if (width == stride) {
     memcpy(input_mems[0]->virt_addr, input_data, width*input_attrs[0].dims[1]*input_attrs[0].dims[3]);
@@ -294,14 +299,13 @@ int main(int argc, char* argv[])
     }
   }
 
-  // Destory rknn memory
-  rknn_destory_mem(ctx, input_mems[0]);
+  // Destroy rknn memory
+  rknn_destroy_mem(ctx, input_mems[0]);
   for (uint32_t i = 0; i < io_num.n_output; ++i) {
-    rknn_destory_mem(ctx, output_mems[i]);
+    rknn_destroy_mem(ctx, output_mems[i]);
   }
 
-  // destory
+  // destroy
   rknn_destroy(ctx);
-  free(input_data);
   return 0;
 }

@@ -142,3 +142,4 @@ endif()
 
 install(DIRECTORY model DESTINATION ./)
 install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)
+install(PROGRAMS ${RGA_LIB} DESTINATION lib)

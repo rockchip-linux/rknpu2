@@ -77,12 +77,19 @@ int readLines(const char *fileName, char *lines[], int max_line)
     char *s;
     int i = 0;
     int n = 0;
+
+    if (file == NULL) {
+        printf("Open %s fail!\n", fileName);
+        return -1;
+    }
+
     while ((s = readLine(file, s, &n)) != NULL)
     {
         lines[i++] = s;
         if (i >= max_line)
             break;
     }
+    fclose(file);
     return i;
 }
 
@@ -362,4 +369,14 @@ int post_process(int8_t *input0, int8_t *input1, int8_t *input2, int model_in_h,
     group->count = last_count;
 
     return 0;
+}
+
+void deinitPostProcess() {
+
+    for (int i=0; i<OBJ_CLASS_NUM; i++) {
+        if(labels[i] != nullptr) {
+            free(labels[i]);
+            labels[i] = nullptr;
+        }
+    }
 }

@@ -2,7 +2,10 @@
 
 set -e
 
-ANDROID_NDK_PATH=/opt/tools/rk/android-ndk-r17/
+if [ -z ${ANDROID_NDK_PATH} ]
+then
+  ANDROID_NDK_PATH=~/opt/tool_chain/android-ndk-r17
+fi
 
 BUILD_TYPE=Release
 

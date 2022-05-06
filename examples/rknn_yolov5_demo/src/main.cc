@@ -160,7 +160,7 @@ int main(int argc, char **argv)
         printf("cv::imread %s fail!\n", image_name);
         return -1;
     }
-    cv::Mat img = orig_img.clone();
+    cv::Mat img;
     cv::cvtColor(orig_img, img, cv::COLOR_BGR2RGB);
     img_width = img.cols;
     img_height = img.rows;
@@ -337,6 +337,8 @@ int main(int argc, char **argv)
     printf("loop count = %d , average run  %f ms\n", test_count,
            (__get_us(stop_time) - __get_us(start_time)) / 1000.0 / test_count);
 
+    deinitPostProcess();
+    
     // release
     ret = rknn_destroy(ctx);
 
