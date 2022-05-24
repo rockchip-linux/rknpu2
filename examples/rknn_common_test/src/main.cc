@@ -15,6 +15,9 @@
 /*-------------------------------------------
                 Includes
 -------------------------------------------*/
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
 #include "rknn_api.h"
 
 #include <float.h>
@@ -22,10 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgproc.hpp"
-#include "opencv2/imgcodecs.hpp"
 
 using namespace std;
 using namespace cv;
@@ -75,7 +74,6 @@ static void dump_tensor_attr(rknn_tensor_attr* attr)
          attr->n_elems, attr->size, get_format_string(attr->fmt), get_type_string(attr->type),
          get_qnt_type_string(attr->qnt_type), attr->zp, attr->scale);
 }
-
 
 /*-------------------------------------------
                   Main Functions
@@ -188,11 +186,10 @@ int main(int argc, char* argv[])
   int width   = 0;
   int channel = 0;
 
-
   cv::Mat orig_img = imread(input_path, cv::IMREAD_COLOR);
-  if(!orig_img.data) {
-      printf("cv::imread %s fail!\n", input_path);
-      return -1;
+  if (!orig_img.data) {
+    printf("cv::imread %s fail!\n", input_path);
+    return -1;
   }
 
   // if origin model is from Caffe, you maybe not need do BGR2RGB.
@@ -200,9 +197,9 @@ int main(int argc, char* argv[])
   cv::cvtColor(orig_img, orig_img_rgb, cv::COLOR_BGR2RGB);
 
   cv::Mat img = orig_img_rgb.clone();
-  if(orig_img.cols != req_width || orig_img.rows != req_height) {
-      printf("resize %d %d to %d %d\n", orig_img.cols, orig_img.rows, req_width, req_height);
-      cv::resize(orig_img, img, cv::Size(req_width, req_height), (0, 0), (0, 0), cv::INTER_LINEAR);
+  if (orig_img.cols != req_width || orig_img.rows != req_height) {
+    printf("resize %d %d to %d %d\n", orig_img.cols, orig_img.rows, req_width, req_height);
+    cv::resize(orig_img_rgb, img, cv::Size(req_width, req_height), (0, 0), (0, 0), cv::INTER_LINEAR);
   }
   input_data = img.data;
   if (!input_data) {
@@ -220,11 +217,11 @@ int main(int argc, char* argv[])
   input_mems[0] = rknn_create_mem(ctx, input_attrs[0].size_with_stride);
 
   // Copy input data to input tensor memory
-  width  = input_attrs[0].dims[2];
+  width      = input_attrs[0].dims[2];
   int stride = input_attrs[0].w_stride;
 
   if (width == stride) {
-    memcpy(input_mems[0]->virt_addr, input_data, width*input_attrs[0].dims[1]*input_attrs[0].dims[3]);
+    memcpy(input_mems[0]->virt_addr, input_data, width * input_attrs[0].dims[1] * input_attrs[0].dims[3]);
   } else {
     int height  = input_attrs[0].dims[1];
     int channel = input_attrs[0].dims[3];

@@ -17,7 +17,7 @@
    ```sh
    ## 如果已安装onnx-simplifier,跳过这句
    pip install onnx-simplifier
-
+   
    python -m onnxsim yolov5s.onnx  yolov5s.onnx
    ```
 
@@ -125,11 +125,16 @@ export TOOL_CHAIN=~/opt/tool_chain/gcc-9.3.0-x86_64_aarch64-linux-gnu/host
 
 ### 推送执行文件到板子
 
-连接板子的usb口到PC,将整个demo目录到 `/userdata`:
 
-```sh
+将 install/rknn_yolov5_demo_Linux 拷贝到板子的/userdata/目录.
+
+- 如果使用rockchip的EVB板子，可以使用adb将文件推到板子上：
+
+```
 adb push install/rknn_yolov5_demo_Linux /userdata/
 ```
+
+- 如果使用其他板子，可以使用scp等方式将install/rknn_yolov5_demo_Linux拷贝到板子的/userdata/目录
 
 ### 运行
 
@@ -142,7 +147,7 @@ export LD_LIBRARY_PATH=./lib
 ```
 
 Note: Try searching the location of librga.so and add it to LD_LIBRARY_PATH if the librga.so is not found on the lib folder.
-Using the following commnands to add to LD_LIBRARY_PATH.
+Using the following commands to add to LD_LIBRARY_PATH.
 
 ```sh
 export LD_LIBRARY_PATH=./lib:<LOCATION_LIBRGA.SO>

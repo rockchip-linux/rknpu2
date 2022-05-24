@@ -2,6 +2,7 @@
 #define _RKNN_ZERO_COPY_DEMO_POSTPROCESS_H_
 
 #include <stdint.h>
+#include <vector>
 
 #define OBJ_NAME_MAX_SIZE 16
 #define OBJ_NUMB_MAX_SIZE 64

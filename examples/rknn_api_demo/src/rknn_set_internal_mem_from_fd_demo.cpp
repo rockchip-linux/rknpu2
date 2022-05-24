@@ -343,7 +343,7 @@ int main(int argc, char* argv[])
   int width  = input_attrs[0].dims[2];
   int stride = input_attrs[0].w_stride;
   if (width == stride) {
-    memcpy(input_mems[0]->virt_addr, input_data, width*input_attrs[0].dims[1]*input_attrs[0].dims[3]);
+    memcpy(input_mems[0]->virt_addr, input_data, width * input_attrs[0].dims[1] * input_attrs[0].dims[3]);
   } else {
     int height  = input_attrs[0].dims[1];
     int channel = input_attrs[0].dims[3];

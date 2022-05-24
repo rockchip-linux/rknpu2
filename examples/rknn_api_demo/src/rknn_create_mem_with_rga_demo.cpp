@@ -15,6 +15,9 @@
 /*-------------------------------------------
                 Includes
 -------------------------------------------*/
+#include "RgaUtils.h"
+#include "im2d.h"
+#include "rga.h"
 #include "rknn_api.h"
 
 #include <float.h>
@@ -23,16 +26,12 @@
 #include <string.h>
 #include <sys/time.h>
 
-#include "im2d.h"
-#include "RgaUtils.h"
-#include "rga.h"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb/stb_image_resize.h>
 
-#define ALIGN         8
+#define ALIGN 8
 
 /*-------------------------------------------
                   Functions
@@ -148,14 +147,14 @@ int main(int argc, char* argv[])
   if (argc > 3) {
     loop_count = atoi(argv[3]);
   }
- 
+
   rknn_context ctx = 0;
 
   // init rga context
   rga_buffer_t src;
   rga_buffer_t dst;
-  im_rect src_rect;
-  im_rect dst_rect;
+  im_rect      src_rect;
+  im_rect      dst_rect;
   memset(&src_rect, 0, sizeof(src_rect));
   memset(&dst_rect, 0, sizeof(dst_rect));
   memset(&src, 0, sizeof(src));
@@ -227,27 +226,27 @@ int main(int argc, char* argv[])
   rknn_tensor_type   input_type   = RKNN_TENSOR_UINT8;
   rknn_tensor_format input_layout = RKNN_TENSOR_NHWC;
 
-  int img_input_height  = 0;
-  int img_input_width   = 0;
-  int channel = 0;
-  input_data = stbi_load(input_path, &img_input_height, &img_input_width, &channel, 3);
-  int model_in_height = 0;
-  int model_in_width = 0;
-  int req_channel = 0;
+  int img_input_height = 0;
+  int img_input_width  = 0;
+  int channel          = 0;
+  input_data           = stbi_load(input_path, &img_input_height, &img_input_width, &channel, 3);
+  int model_in_height  = 0;
+  int model_in_width   = 0;
+  int req_channel      = 0;
   switch (input_attrs[0].fmt) {
-    case RKNN_TENSOR_NHWC:
-      model_in_height  = input_attrs[0].dims[1];
-      model_in_width   = input_attrs[0].dims[2];
-      req_channel = input_attrs[0].dims[3];
-      break;
-    case RKNN_TENSOR_NCHW:
-      model_in_height  = input_attrs[0].dims[2];
-      model_in_width   = input_attrs[0].dims[3];
-      req_channel = input_attrs[0].dims[1];
-      break;
-    default:
-      printf("meet unsupported layout\n");
-      return -1;
+  case RKNN_TENSOR_NHWC:
+    model_in_height = input_attrs[0].dims[1];
+    model_in_width  = input_attrs[0].dims[2];
+    req_channel     = input_attrs[0].dims[3];
+    break;
+  case RKNN_TENSOR_NCHW:
+    model_in_height = input_attrs[0].dims[2];
+    model_in_width  = input_attrs[0].dims[3];
+    req_channel     = input_attrs[0].dims[1];
+    break;
+  default:
+    printf("meet unsupported layout\n");
+    return -1;
   }
 
   if (!input_data) {
@@ -255,7 +254,8 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  src = wrapbuffer_virtualaddr((void *)input_data, img_input_width, img_input_height, RK_FORMAT_RGB_888); //wstride, hstride, 
+  src = wrapbuffer_virtualaddr((void*)input_data, img_input_width, img_input_height,
+                               RK_FORMAT_RGB_888); // wstride, hstride,
 
   // Create input tensor memory
   rknn_tensor_mem* input_mems[1];
@@ -270,23 +270,24 @@ int main(int argc, char* argv[])
 
   int wstride = model_in_width + (ALIGN - model_in_width % ALIGN) % ALIGN;
   int hstride = model_in_height;
-  dst = wrapbuffer_fd_t(input_mems[0]->fd, model_in_width, model_in_height, wstride, hstride, RK_FORMAT_RGB_888); // wstride, hstride, 
+  dst         = wrapbuffer_fd_t(input_mems[0]->fd, model_in_width, model_in_height, wstride, hstride,
+                        RK_FORMAT_RGB_888); // wstride, hstride,
 
   ret = imcheck(src, dst, src_rect, dst_rect);
-  if (IM_STATUS_NOERROR != ret)
-  {
-      printf("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
-      return -1;
+  if (IM_STATUS_NOERROR != ret) {
+    printf("%d, check error! %s", __LINE__, imStrError((IM_STATUS)ret));
+    return -1;
   }
-  
+
   IM_STATUS STATUS = imresize(src, dst);
 
   // Create output tensor memory
   rknn_tensor_mem* output_mems[io_num.n_output];
   for (uint32_t i = 0; i < io_num.n_output; ++i) {
+    int output_size = output_attrs[i].n_elems * sizeof(float);
     // default output type is depend on model, this require float32 to compute top5
     output_attrs[i].type = RKNN_TENSOR_FLOAT32;
-    output_mems[i]       = rknn_create_mem(ctx, output_attrs[i].size_with_stride);
+    output_mems[i]       = rknn_create_mem(ctx, output_size);
   }
 
   // Set input tensor memory

@@ -1,6 +1,6 @@
-下述<TARGET_PLATFORM>是RK356X或RK3588
+The following <TARGET_PLATFORM> represents RK356X or RK3588.
 # Aarch64 Linux Demo
-## build
+## Build
 
 modify `GCC_COMPILER` on `build-linux_<TARGET_PLATFORM>.sh` for target platform, then execute
 
@@ -8,16 +8,22 @@ modify `GCC_COMPILER` on `build-linux_<TARGET_PLATFORM>.sh` for target platform,
 ./build-linux_<TARGET_PLATFORM>.sh
 ```
 
-## install
+## Install
 
-connect device and push build output into `/userdata`
+Copy install/rknn_api_demo_Linux and ../rknn_mobilenet_demo/model/ to the devices.
+
+- If you use rockchip's evb board, you can use the following way:
+
+Connect device and push the program and rknn model to `/userdata`
 
 ```
 adb push install/rknn_api_demo_Linux /userdata/
 adb push ../rknn_mobilenet_demo/model/ /userdata/rknn_api_demo_Linux
 ```
 
-## run
+- If your board has sshd service, you can use scp or other methods to copy the program and rknn model to the board.
+
+## Run
 
 ```
 adb shell
@@ -31,7 +37,7 @@ export LD_LIBRARY_PATH=./lib
 ```
 
 # Android Demo
-## build
+## Build
 
 modify `ANDROID_NDK_PATH` on `build-android_<TARGET_PLATFORM>.sh` for target platform, then execute
 
@@ -39,7 +45,7 @@ modify `ANDROID_NDK_PATH` on `build-android_<TARGET_PLATFORM>.sh` for target pla
 ./build-android_<TARGET_PLATFORM>.sh
 ```
 
-## install
+## Install
 
 connect device and push build output into `/data`
 
@@ -48,7 +54,7 @@ adb push install/rknn_api_demo_Android /data/
 adb push ../rknn_mobilenet_demo/model/ /userdata/rknn_api_demo_Android
 ```
 
-## run
+## Run
 
 ```
 adb shell

@@ -39,7 +39,7 @@ adb push install/rknn_yolov5_demo_Linux /userdata/
 adb shell
 cd /userdata/rknn_yolov5_demo_Linux/
 
-export LD_LIBRARY_PATH=/userdata/lib
+export LD_LIBRARY_PATH=/userdata/rknn_yolov5_demo_Linux/lib
 ./rknn_yolov5_demo model/RV1106/yolov5s-640-640.rknn model/bus.jpg
 ```
 

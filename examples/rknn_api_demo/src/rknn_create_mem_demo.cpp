@@ -125,29 +125,28 @@ static unsigned char* load_image(const char* image_path, rknn_tensor_attr* input
   return image_data;
 }
 
-static unsigned char *load_model(const char *filename, int *model_size)
+static unsigned char* load_model(const char* filename, int* model_size)
 {
-    FILE *fp = fopen(filename, "rb");
-    if(fp == nullptr) {
-        printf("fopen %s fail!\n", filename);
-        return NULL;
-    }
-    fseek(fp, 0, SEEK_END);
-    int model_len = ftell(fp);
-    unsigned char *model = (unsigned char*)malloc(model_len);
-    fseek(fp, 0, SEEK_SET);
-    if(model_len != fread(model, 1, model_len, fp)) {
-        printf("fread %s fail!\n", filename);
-        free(model);
-        return NULL;
-    }
-    *model_size = model_len;
-    if(fp) {
-        fclose(fp);
-    }
-    return model;
+  FILE* fp = fopen(filename, "rb");
+  if (fp == nullptr) {
+    printf("fopen %s fail!\n", filename);
+    return NULL;
+  }
+  fseek(fp, 0, SEEK_END);
+  int            model_len = ftell(fp);
+  unsigned char* model     = (unsigned char*)malloc(model_len);
+  fseek(fp, 0, SEEK_SET);
+  if (model_len != fread(model, 1, model_len, fp)) {
+    printf("fread %s fail!\n", filename);
+    free(model);
+    return NULL;
+  }
+  *model_size = model_len;
+  if (fp) {
+    fclose(fp);
+  }
+  return model;
 }
-
 
 /*-------------------------------------------
                   Main Functions
@@ -170,9 +169,9 @@ int main(int argc, char* argv[])
   rknn_context ctx = 0;
 
   // Load RKNN Model
-  int model_len = 0;
-  unsigned char *model = load_model(model_path, &model_len);
-  int ret = rknn_init(&ctx, model, model_len, 0, NULL);
+  int            model_len = 0;
+  unsigned char* model     = load_model(model_path, &model_len);
+  int            ret       = rknn_init(&ctx, model, model_len, 0, NULL);
   if (ret < 0) {
     printf("rknn_init fail! ret=%d\n", ret);
     return -1;
@@ -185,6 +184,7 @@ int main(int argc, char* argv[])
     printf("rknn_query fail! ret=%d\n", ret);
     return -1;
   }
+
   printf("rknn_api/rknnrt version: %s, driver version: %s\n", sdk_ver.api_version, sdk_ver.drv_version);
 
   // Get Model Input Output Info
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
   int stride = input_attrs[0].w_stride;
 
   if (width == stride) {
-    memcpy(input_mems[0]->virt_addr, input_data, width*input_attrs[0].dims[1]*input_attrs[0].dims[3]);
+    memcpy(input_mems[0]->virt_addr, input_data, width * input_attrs[0].dims[1] * input_attrs[0].dims[3]);
   } else {
     int height  = input_attrs[0].dims[1];
     int channel = input_attrs[0].dims[3];
