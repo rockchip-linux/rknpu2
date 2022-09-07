@@ -208,12 +208,12 @@ int main(int argc, char** argv)
   if (input_attrs[0].fmt == RKNN_TENSOR_NCHW) {
     printf("model is NCHW input fmt\n");
     channel = input_attrs[0].dims[1];
-    width   = input_attrs[0].dims[2];
-    height  = input_attrs[0].dims[3];
+    height  = input_attrs[0].dims[2];
+    width   = input_attrs[0].dims[3];
   } else {
     printf("model is NHWC input fmt\n");
-    width   = input_attrs[0].dims[1];
-    height  = input_attrs[0].dims[2];
+    height  = input_attrs[0].dims[1];
+    width   = input_attrs[0].dims[2];
     channel = input_attrs[0].dims[3];
   }
 

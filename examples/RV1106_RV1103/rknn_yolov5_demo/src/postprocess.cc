@@ -234,10 +234,6 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
                     box_h = box_h * box_h * (float)anchor[a * 2 + 1];
                     box_x -= (box_w / 2.0);
                     box_y -= (box_h / 2.0);
-                    boxes.push_back(box_x);
-                    boxes.push_back(box_y);
-                    boxes.push_back(box_w);
-                    boxes.push_back(box_h);
 
                     int8_t maxClassProbs = in_ptr[5 * grid_len];
                     int maxClassId = 0;
@@ -250,9 +246,15 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
                             maxClassProbs = prob;
                         }
                     }
-                    objProbs.push_back(sigmoid(deqnt_affine_to_f32(maxClassProbs, zp, scale)));
-                    classId.push_back(maxClassId);
-                    validCount++;
+                    if (maxClassProbs>thres_i8){
+                        boxes.push_back(box_x);
+                        boxes.push_back(box_y);
+                        boxes.push_back(box_w);
+                        boxes.push_back(box_h);
+                        objProbs.push_back(sigmoid(deqnt_affine_to_f32(maxClassProbs, zp, scale))* sigmoid(deqnt_affine_to_f32(box_confidence, zp, scale)));
+                        classId.push_back(maxClassId);
+                        validCount++;
+                    }
                 }
             }
         }

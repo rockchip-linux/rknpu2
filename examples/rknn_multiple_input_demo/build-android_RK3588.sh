@@ -4,7 +4,7 @@ set -e
 
 if [ -z ${ANDROID_NDK_PATH} ]
 then
-  ANDROID_NDK_PATH=~/opt/tool_chain/android-ndk-r17
+  ANDROID_NDK_PATH=~/opt/android-ndk-r16b
 fi
 
 BUILD_TYPE=Release
@@ -21,12 +21,13 @@ fi
 
 cd ${BUILD_DIR}
 cmake ../.. \
+        -DANDROID_TOOLCHAIN=clang \
         -DTARGET_SOC=${TARGET_SOC} \
        	-DCMAKE_SYSTEM_NAME=Android \
-        -DCMAKE_SYSTEM_VERSION=24 \
-        -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a \
-        -DCMAKE_ANDROID_STL_TYPE=c++_static \
-        -DCMAKE_ANDROID_NDK=$ANDROID_NDK_PATH \
+        -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_PATH/build/cmake/android.toolchain.cmake \
+        -DANDROID_ABI="arm64-v8a" \
+        -DANDROID_STL=c++_static \
+        -DANDROID_PLATFORM=android-24 \
         -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 make -j4
 make install

@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
   cv::Mat img = orig_img_rgb.clone();
   if (orig_img.cols != req_width || orig_img.rows != req_height) {
     printf("resize %d %d to %d %d\n", orig_img.cols, orig_img.rows, req_width, req_height);
-    cv::resize(orig_img_rgb, img, cv::Size(req_width, req_height), (0, 0), (0, 0), cv::INTER_LINEAR);
+    cv::resize(orig_img_rgb, img, cv::Size(req_width, req_height), 0, 0, cv::INTER_LINEAR);
   }
   input_data = img.data;
   if (!input_data) {

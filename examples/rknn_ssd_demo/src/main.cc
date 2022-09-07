@@ -85,7 +85,7 @@ int main(int argc, char** argv)
   int            ret          = 0;
   int            model_len    = 0;
   unsigned char* model        = nullptr;
-  rknn_context   ctx;
+  rknn_context ctx = 0;
 
   const char* model_path = argv[1];
   const char* img_path   = argv[2];
@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 
   if (orig_img_rgb.cols != img_width || orig_img_rgb.rows != img_height) {
     printf("resize %d %d to %d %d\n", orig_img_rgb.cols, orig_img_rgb.rows, img_width, img_height);
-    cv::resize(orig_img_rgb, img, cv::Size(img_width, img_height), (0, 0), (0, 0), cv::INTER_LINEAR);
+    cv::resize(orig_img_rgb, img, cv::Size(img_width, img_height), 0, 0, cv::INTER_LINEAR);
   }
 
   // Load RKNN Model
@@ -217,7 +217,8 @@ int main(int argc, char** argv)
   deinitPostProcessSSD();
 
   // Release
-  if (ctx >= 0) {
+  if (ctx > 0)
+  {
     rknn_destroy(ctx);
   }
   if (model) {

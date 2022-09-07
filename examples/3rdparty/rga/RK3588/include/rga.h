@@ -19,12 +19,28 @@
 #ifndef _RGA_DRIVER_H_
 #define _RGA_DRIVER_H_
 
+#include <asm/ioctl.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <stdint.h>
+/* Use 'r' as magic number */
+#define RGA_IOC_MAGIC       'r'
+#define RGA_IOW(nr, type)   _IOW(RGA_IOC_MAGIC, nr, type)
+#define RGA_IOR(nr, type)   _IOR(RGA_IOC_MAGIC, nr, type)
+#define RGA_IOWR(nr, type)  _IOWR(RGA_IOC_MAGIC, nr, type)
+
+#define RGA_IOC_GET_DRVIER_VERSION  RGA_IOR(0x1, struct rga_version_t)
+#define RGA_IOC_GET_HW_VERSION      RGA_IOR(0x2, struct rga_hw_versions_t)
+#define RGA_IOC_IMPORT_BUFFER       RGA_IOWR(0x3, struct rga_buffer_pool)
+#define RGA_IOC_RELEASE_BUFFER      RGA_IOW(0x4, struct rga_buffer_pool)
+#define RGA_START_CONFIG            RGA_IOR(0x5, uint32_t)
+#define RGA_END_CONFIG              RGA_IOWR(0x6, struct rga_user_ctx_t)
+#define RGA_CMD_CONFIG              RGA_IOWR(0x7, struct rga_user_ctx_t)
+#define RGA_CANCEL_CONFIG           RGA_IOWR(0x8, uint32_t)
 
 #define RGA_BLIT_SYNC   0x5017
 #define RGA_BLIT_ASYNC  0x5018
@@ -36,7 +52,6 @@ extern "C"
 #define RGA2_BLIT_ASYNC  0x6018
 #define RGA2_FLUSH       0x6019
 #define RGA2_GET_RESULT  0x601a
-#define RGA2_GET_VERSION 0x601b
 #define RGA2_GET_VERSION 0x601b
 
 #define RGA_REG_CTRL_LEN    0x8    /* 8  */
@@ -50,6 +65,12 @@ extern "C"
 #ifndef DISABLE
 #define DISABLE 0
 #endif
+
+enum rga_memory_type {
+    RGA_DMA_BUFFER = 0,
+    RGA_VIRTUAL_ADDRESS,
+    RGA_PHYSICAL_ADDRESS
+};
 
 /* RGA process mode enum */
 enum {
@@ -121,9 +142,9 @@ enum {
 #define RGA_SCHED_PRIORITY_MAX 6
 
 enum {
-	RGA3_SCHEDULER_CORE0		= 1 << 0,
-	RGA3_SCHEDULER_CORE1		= 1 << 1,
-	RGA2_SCHEDULER_CORE0		= 1 << 2,
+    RGA3_SCHEDULER_CORE0    = 1 << 0,
+    RGA3_SCHEDULER_CORE1    = 1 << 1,
+    RGA2_SCHEDULER_CORE0    = 1 << 2,
 };
 
 /*
@@ -181,8 +202,11 @@ typedef enum _Rga_SURF_FORMAT {
 
     RK_FORMAT_YCbCr_420_SP_10B = 0x20 << 8,
     RK_FORMAT_YCrCb_420_SP_10B = 0x21 << 8,
-    RK_FORMAT_YCbCr_422_10b_SP = 0x22 << 8,
-    RK_FORMAT_YCrCb_422_10b_SP = 0x23 << 8,
+    RK_FORMAT_YCbCr_422_SP_10B = 0x22 << 8,
+    RK_FORMAT_YCrCb_422_SP_10B = 0x23 << 8,
+    /* For compatibility with misspellings */
+    RK_FORMAT_YCbCr_422_10b_SP = RK_FORMAT_YCbCr_422_SP_10B,
+    RK_FORMAT_YCrCb_422_10b_SP = RK_FORMAT_YCrCb_422_SP_10B,
 
     RK_FORMAT_BGR_565      = 0x24 << 8,
     RK_FORMAT_BGRA_5551    = 0x25 << 8,
@@ -197,6 +221,8 @@ typedef enum _Rga_SURF_FORMAT {
     RK_FORMAT_ABGR_5551    = 0x2e << 8,
     RK_FORMAT_ABGR_4444    = 0x2f << 8,
 
+    RK_FORMAT_RGBA2BPP     = 0x30 << 8,
+
     RK_FORMAT_UNKNOWN      = 0x100 << 8,
 } RgaSURF_FORMAT;
 
@@ -204,7 +230,7 @@ typedef enum _Rga_SURF_FORMAT {
 enum
 {
     raster_mode             = 0x1 << 0,
-    afbc_mode               = 0x1 << 1,
+    fbc_mode                = 0x1 << 1,
     tile_mode               = 0x1 << 2,
 };
 
@@ -225,14 +251,14 @@ typedef struct rga_img_info_t {
     uint16_t endian_mode; //for BPP
     uint16_t alpha_swap;
 
-	//used by RGA3
-	uint16_t rotate_mode;
+    //used by RGA3
+    uint16_t rotate_mode;
     uint16_t rd_mode;
 
-	uint16_t is_10b_compact;
-	uint16_t is_10b_endian;
+    uint16_t is_10b_compact;
+    uint16_t is_10b_endian;
 
-	uint16_t enable;
+    uint16_t enable;
 }
 rga_img_info_t;
 
@@ -299,6 +325,153 @@ typedef struct full_csc_t {
     csc_coe_t coe_u;
     csc_coe_t coe_v;
 } full_csc_t;
+
+struct rga_mosaic_info {
+    uint8_t enable;
+    uint8_t mode;
+};
+
+struct rga_pre_intr_info {
+    uint8_t enable;
+
+    uint8_t read_intr_en;
+    uint8_t write_intr_en;
+    uint8_t read_hold_en;
+    uint32_t read_threshold;
+    uint32_t write_start;
+    uint32_t write_step;
+};
+
+/* MAX(min, (max - channel_value)) */
+struct rga_osd_invert_factor {
+    uint8_t alpha_max;
+    uint8_t alpha_min;
+    uint8_t yg_max;
+    uint8_t yg_min;
+    uint8_t crb_max;
+    uint8_t crb_min;
+};
+
+struct rga_color {
+    union {
+        struct {
+            uint8_t red;
+            uint8_t green;
+            uint8_t blue;
+            uint8_t alpha;
+        };
+        uint32_t value;
+    };
+};
+
+struct rga_osd_bpp2 {
+    uint8_t  ac_swap;           // ac swap flag
+                                // 0: CA
+                                // 1: AC
+    uint8_t  endian_swap;       // rgba2bpp endian swap
+                                // 0: Big endian
+                                // 1: Little endian
+    struct rga_color color0;
+    struct rga_color color1;
+};
+
+struct rga_osd_mode_ctrl {
+    uint8_t mode;               // OSD cal mode:
+                                //   0b'1: statistics mode
+                                //   1b'1: auto inversion overlap mode
+    uint8_t direction_mode;     // horizontal or vertical
+                                //   0: horizontal
+                                //   1: vertical
+    uint8_t width_mode;         // using @fix_width or LUT width
+                                //   0: fix width
+                                //   1: LUT width
+    uint16_t block_fix_width;   // OSD block fixed width
+                                //   real width = (fix_width + 1) * 2
+    uint8_t block_num;          // OSD block num
+    uint16_t flags_index;       // auto invert flags index
+
+    /* invertion config */
+    uint8_t color_mode;         // selete color
+                                //   0: src1 color
+                                //   1: config data color
+    uint8_t invert_flags_mode;  // invert flag selete
+                                //   0: use RAM flag
+                                //   1: usr last result
+    uint8_t default_color_sel;  // default color mode
+                                //   0: default is bright
+                                //   1: default is dark
+    uint8_t invert_enable;      // invert channel enable
+                                //   1 << 0: aplha enable
+                                //   1 << 1: Y/G disable
+                                //   1 << 2: C/RB disable
+    uint8_t invert_mode;        // invert cal mode
+                                //   0: normal(max-data)
+                                //   1: swap
+    uint8_t invert_thresh;      // if luma > thresh, osd_flag to be 1
+    uint8_t unfix_index;        // OSD width config index
+};
+
+struct rga_osd_info {
+    uint8_t  enable;
+
+    struct rga_osd_mode_ctrl mode_ctrl;
+    struct rga_osd_invert_factor cal_factor;
+    struct rga_osd_bpp2 bpp2_info;
+
+    union {
+        struct {
+            uint32_t last_flags1;
+            uint32_t last_flags0;
+        };
+        uint64_t last_flags;
+    };
+
+    union {
+        struct {
+            uint32_t cur_flags1;
+            uint32_t cur_flags0;
+        };
+        uint64_t cur_flags;
+    };
+};
+
+#define RGA_VERSION_SIZE    16
+#define RGA_HW_SIZE            5
+
+struct rga_version_t {
+    uint32_t major;
+    uint32_t minor;
+    uint32_t revision;
+    uint8_t str[RGA_VERSION_SIZE];
+};
+
+struct rga_hw_versions_t {
+    struct rga_version_t version[RGA_HW_SIZE];
+    uint32_t size;
+};
+
+struct rga_memory_parm {
+    uint32_t width;
+    uint32_t height;
+    uint32_t format;
+
+    uint32_t size;
+};
+
+struct rga_external_buffer {
+    uint64_t memory;
+    uint32_t type;
+
+    uint32_t handle;
+    struct rga_memory_parm memory_info;
+
+    uint8_t reserve[252];
+};
+
+struct rga_buffer_pool {
+    uint64_t buffers;
+    uint32_t size;
+};
 
 struct rga_req {
     uint8_t render_mode;                  /* (enum) process mode sel */
@@ -377,12 +550,36 @@ struct rga_req {
 
     full_csc_t full_csc;                  /* full color space convert */
 
-	int32_t in_fence_fd;
+    int32_t in_fence_fd;
     uint8_t core;
     uint8_t priority;
     int32_t out_fence_fd;
 
-	uint8_t reservr[128];
+    uint8_t handle_flag;
+
+    /* RGA2 1106 add */
+    struct rga_mosaic_info mosaic_info;
+
+    uint8_t uvhds_mode;
+    uint8_t uvvds_mode;
+
+    struct rga_osd_info osd_info;
+
+    struct rga_pre_intr_info pre_intr_info;
+
+    uint8_t reservr[59];
+};
+
+struct rga_user_ctx_t {
+    uint64_t cmd_ptr;
+    uint32_t cmd_num;
+    uint32_t id;
+    uint32_t sync_mode;
+    uint32_t out_fence_fd;
+
+    uint32_t mpi_config_flags;
+
+    uint8_t reservr[124];
 };
 
 #ifdef __cplusplus

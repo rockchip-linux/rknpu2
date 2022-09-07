@@ -72,4 +72,4 @@ export LD_LIBRARY_PATH=./lib
 
 # Note
  - You may need to update libmpimmz.so and its header file of this project according to the implementation of MMZ in the system.
- - You may need to update librga.so and its header file of this project according to the implementation of RGA in the system.
+ - You may need to update librga.so and its header file of this project according to the implementation of RGA in the system. https://github.com/airockchip/librga

@@ -6,10 +6,29 @@
   - RK3588/RK3588S
   - RV1103/RV1106
 
-Note: The content of this project is not applicable to RK1808/RV1109/RV1126/RK3399Pro.
-      The rknn model must be generated using RKNN Toolkit 2 instead of RKNN Toolkit.
+Note:
+      The rknn model must be generated using RKNN Toolkit 2:  https://github.com/rockchip-linux/rknn-toolkit2
+
+​      **For RK1808/RV1109/RV1126/RK3399Pro, please use:**
+
+​          https://github.com/rockchip-linux/rknn-toolkit
+
+​          https://github.com/rockchip-linux/rknpu
+
+​          https://github.com/airockchip/RK3399Pro_npu
 
 ## ReleaseLog
+
+### 1.4.0
+- Support more NPU operators, such as Reshape、Transpose、MatMul、 Max、Min、exGelu、exSoftmax13、Resize etc.
+- Add **Weight Share**  function, reduce memory usage.
+- Add **Weight Compression** function, reduce memory and bandwidth usage.(RK3588/RV1103/RV1106)
+- RK3588 supports storing weights or feature maps on SRAM, reducing system bandwidth consumption.
+- RK3588 adds the function of running a single model on multiple cores at the same time.
+- Add new output layout NHWC (C has alignment restrictions) .
+- Improve support for non-4D input.
+- Add more examples such as rknn_yolov5_android_apk_demo and rknn_internal_mem_reuse_demo.
+- Bug fix.
 
 ### 1.3.0
 

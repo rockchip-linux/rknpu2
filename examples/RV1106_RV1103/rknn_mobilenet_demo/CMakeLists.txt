@@ -22,12 +22,21 @@ add_executable(rknn_mobilenet_demo
 
 target_link_libraries(rknn_mobilenet_demo
   ${RKNN_RT_LIB}
-  ${OpenCV_LIBS}
 )
 
 # install target and libraries
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_mobilenet_demo_${CMAKE_SYSTEM_NAME})
 install(TARGETS rknn_mobilenet_demo DESTINATION ./)
+
+add_executable(rknn_mobilenet_nhwc_demo
+    src/main_nhwc.cc
+)
+
+target_link_libraries(rknn_mobilenet_nhwc_demo
+  ${RKNN_RT_LIB}
+)
+
+install(TARGETS rknn_mobilenet_nhwc_demo DESTINATION ./)
 
 install(DIRECTORY model DESTINATION ./)
 install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)

@@ -116,6 +116,8 @@ typedef enum _rknn_query_cmd {
     RKNN_QUERY_NATIVE_NHWC_INPUT_ATTR = 10,                 /* query the attribute of native input tensor. */
     RKNN_QUERY_NATIVE_NHWC_OUTPUT_ATTR = 11,                /* query the attribute of native output tensor. */
 
+    RKNN_QUERY_DEVICE_MEM_INFO = 12,                        /* query the attribute of rknn memory information. */
+
     RKNN_QUERY_CMD_MAX
 } rknn_query_cmd;
 
@@ -148,7 +150,7 @@ inline static const char* get_type_string(rknn_tensor_type type)
     case RKNN_TENSOR_UINT16: return "UINT16";
     case RKNN_TENSOR_INT32: return "INT32";
     case RKNN_TENSOR_UINT32: return "UINT32";
-    case RKNN_TENSOR_INT64: return "UINT64";
+    case RKNN_TENSOR_INT64: return "INT64";
     case RKNN_TENSOR_BOOL: return "BOOL";
     default: return "UNKNOW";
     }
@@ -191,12 +193,12 @@ typedef enum _rknn_tensor_format {
     the mode of running on target NPU core.
 */
 typedef enum _rknn_core_mask {
-    RKNN_NPU_CORE_AUTO = 0,                              /* default, run on NPU core randomly. */
-    RKNN_NPU_CORE_0 = 1,                                 /* run on NPU core 0. */
-    RKNN_NPU_CORE_1 = 2,                                 /* run on NPU core 1. */
-    RKNN_NPU_CORE_2 = 4,                                 /* run on NPU core 2. */
-    RKNN_NPU_CORE_0_1 = 3,                               /* run on NPU core 1 and core 2. */
-    RKNN_NPU_CORE_0_1_2 = 7,                             /* run on NPU core 1 and core 2 and core 3. */
+    RKNN_NPU_CORE_AUTO = 0,                                       /* default, run on NPU core randomly. */
+    RKNN_NPU_CORE_0 = 1,                                          /* run on NPU core 0. */
+    RKNN_NPU_CORE_1 = 2,                                          /* run on NPU core 1. */
+    RKNN_NPU_CORE_2 = 4,                                          /* run on NPU core 2. */
+    RKNN_NPU_CORE_0_1 = RKNN_NPU_CORE_0 | RKNN_NPU_CORE_1,        /* run on NPU core 1 and core 2. */
+    RKNN_NPU_CORE_0_1_2 = RKNN_NPU_CORE_0_1 | RKNN_NPU_CORE_2,    /* run on NPU core 1 and core 2 and core 3. */
 
     RKNN_NPU_CORE_UNDEFINED,
 } rknn_core_mask;
@@ -284,6 +286,10 @@ typedef struct _rknn_sdk_version {
 typedef struct _rknn_mem_size {
     uint32_t total_weight_size;                         /* the weight memory size */
     uint32_t total_internal_size;                       /* the internal memory size, exclude inputs/outputs */
+    uint64_t total_dma_allocated_size;                  /* total dma memory allocated size */
+    uint32_t total_sram_size;                           /* total system sram size reserved for rknn */
+    uint32_t free_sram_size;                            /* free system sram size reserved for rknn */
+    uint32_t reserved[10];                              /* reserved */
 } rknn_mem_size;
 
 /*
@@ -299,6 +305,10 @@ typedef struct _rknn_custom_string {
 typedef enum _rknn_tensor_mem_flags {
     RKNN_TENSOR_MEMORY_FLAGS_ALLOC_INSIDE = 1,           /*Used to mark in rknn_destroy_mem() whether it is necessary to release the "mem" pointer itself.
                                                          If the flag RKNN_TENSOR_MEMORY_FLAGS_ALLOC_INSIDE is set, rknn_destroy_mem() will call free(mem).*/
+    RKNN_TENSOR_MEMORY_FLAGS_FROM_FD      = 2,           /*Used to mark in rknn_create_mem_from_fd() whether it is necessary to release the "mem" pointer itself.
+                                                         If the flag RKNN_TENSOR_MEMORY_FLAGS_FROM_FD is set, rknn_destroy_mem() will call free(mem).*/
+    RKNN_TENSOR_MEMORY_FLAGS_FROM_PHYS    = 3,           /*Used to mark in rknn_create_mem_from_phys() whether it is necessary to release the "mem" pointer itself.
+                                                         If the flag RKNN_TENSOR_MEMORY_FLAGS_FROM_PHYS is set, rknn_destroy_mem() will call free(mem).*/
     RKNN_TENSOR_MEMORY_FLAGS_UNKNOWN
 } rknn_tensor_mem_flags;
 
@@ -354,7 +364,9 @@ typedef struct _rknn_output {
 */
 typedef struct _rknn_init_extend {
     rknn_context ctx;                                    /* rknn context */
-    uint8_t reserved[128];                               /* reserved */
+    int32_t      real_model_offset;                      /* real rknn model file size, only valid when init context with rknn file path */
+    uint32_t     real_model_size;                        /* real rknn model file offset, only valid when init context with rknn file path */
+    uint8_t      reserved[120];                          /* reserved */
 } rknn_init_extend;
 
 /*
@@ -443,6 +455,20 @@ int rknn_query(rknn_context context, rknn_query_cmd cmd, void* info, uint32_t si
         int                         error code
 */
 int rknn_inputs_set(rknn_context context, uint32_t n_inputs, rknn_input inputs[]);
+
+/*
+    rknn_set_batch_core_num
+
+    set rknn batch core_num.
+
+    input:
+        rknn_context context        the handle of context.
+        int core_num                the core number.
+    return:
+        int                         error code.
+
+*/
+int rknn_set_batch_core_num(rknn_context context, int core_num);
 
 /*  rknn_set_core_mask
 

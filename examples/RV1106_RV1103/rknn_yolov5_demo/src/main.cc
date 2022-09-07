@@ -147,14 +147,15 @@ static unsigned char *load_image(const char *image_path, rknn_tensor_attr *input
   return image_data;
 }
 
-int NC1HWC2_to_NCHW(const int8_t *src, int8_t *dst, uint32_t *dims, int channel, int hw_dst)
+// 量化模型的npu输出结果为int8数据类型，后处理要按照int8数据类型处理
+// 如下提供了int8排布的NC1HWC2转换成int8的nchw转换代码
+int NC1HWC2_int8_to_NCHW_int8(const int8_t *src, int8_t *dst, int *dims, int channel, int h, int w)
 {
   int batch = dims[0];
   int C1 = dims[1];
-  int h = dims[2];
-  int w = dims[3];
   int C2 = dims[4];
-  int hw_src = w * h;
+  int hw_src = dims[2] * dims[3];
+  int hw_dst = h * w;
   for (int i = 0; i < batch; i++)
   {
     src = src + i * C1 * hw_src * C2;
@@ -169,6 +170,36 @@ int NC1HWC2_to_NCHW(const int8_t *src, int8_t *dst, uint32_t *dims, int channel,
         {
           int cur_hw = cur_h * w + cur_w;
           dst[c * hw_dst + cur_h * w + cur_w] = src_c[C2 * cur_hw + offset];
+        }
+    }
+  }
+
+  return 0;
+}
+
+// 量化模型的npu输出结果为int8数据类型，后处理要按照int8数据类型处理
+// 如下提供了int8排布的NC1HWC2转换成float的nchw转换代码
+int NC1HWC2_int8_to_NCHW_float(const int8_t *src, float *dst, int *dims, int channel, int h, int w, int zp, float scale)
+{
+  int batch = dims[0];
+  int C1 = dims[1];
+  int C2 = dims[4];
+  int hw_src = dims[2] * dims[3];
+  int hw_dst = h * w;
+  for (int i = 0; i < batch; i++)
+  {
+    src = src + i * C1 * hw_src * C2;
+    dst = dst + i * channel * hw_dst;
+    for (int c = 0; c < channel; ++c)
+    {
+      int plane = c / C2;
+      const int8_t *src_c = plane * hw_src * C2 + src;
+      int offset = c % C2;
+      for (int cur_h = 0; cur_h < h; ++cur_h)
+        for (int cur_w = 0; cur_w < w; ++cur_w)
+        {
+          int cur_hw = cur_h * w + cur_w;
+          dst[c * hw_dst + cur_h * w + cur_w] = (src_c[C2 * cur_hw + offset] - zp) * scale; // int8-->float
         }
     }
   }
@@ -393,11 +424,11 @@ int main(int argc, char *argv[])
     dump_tensor_attr(&orig_output_attrs[i]);
   }
 
-  rknn_tensor_mem *output_mems_nchw[io_num.n_output];
+  int8_t *output_mems_nchw[io_num.n_output];
   for (uint32_t i = 0; i < io_num.n_output; ++i)
   {
     int size = orig_output_attrs[i].size_with_stride;
-    output_mems_nchw[i] = rknn_create_mem(ctx, size);
+    output_mems_nchw[i] = (int8_t *)malloc(size);
   }
 
   for (uint32_t i = 0; i < io_num.n_output; i++)
@@ -406,10 +437,8 @@ int main(int argc, char *argv[])
     int h = orig_output_attrs[i].n_dims > 2 ? orig_output_attrs[i].dims[2] : 1;
     int w = orig_output_attrs[i].n_dims > 3 ? orig_output_attrs[i].dims[3] : 1;
     int hw = h * w;
-    int zp = output_attrs[i].zp;
-    float scale = output_attrs[i].scale;
-    NC1HWC2_to_NCHW((int8_t *)output_mems[i]->virt_addr, (int8_t *)output_mems_nchw[i]->virt_addr, output_attrs[i].dims,
-                    channel, hw);
+    NC1HWC2_int8_to_NCHW_int8((int8_t *)output_mems[i]->virt_addr, (int8_t *)output_mems_nchw[i], (int *)output_attrs[i].dims,
+                              channel, h, w);
   }
 
   int model_width = 0;
@@ -439,7 +468,7 @@ int main(int argc, char *argv[])
     out_zps.push_back(output_attrs[i].zp);
   }
 
-  post_process((int8_t *)output_mems_nchw[0]->virt_addr, (int8_t *)output_mems_nchw[1]->virt_addr, (int8_t *)output_mems_nchw[2]->virt_addr, 640, 640,
+  post_process((int8_t *)output_mems_nchw[0], (int8_t *)output_mems_nchw[1], (int8_t *)output_mems_nchw[2], 640, 640,
                box_conf_threshold, nms_threshold, scale_w, scale_h, out_zps, out_scales, &detect_result_group);
 
   char text[256];
@@ -458,7 +487,7 @@ int main(int argc, char *argv[])
   for (uint32_t i = 0; i < io_num.n_output; ++i)
   {
     rknn_destroy_mem(ctx, output_mems[i]);
-    rknn_destroy_mem(ctx, output_mems_nchw[i]);
+    free(output_mems_nchw[i]);
   }
 
   // destroy

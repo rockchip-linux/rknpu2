@@ -104,7 +104,7 @@ int main(int argc, char** argv)
   const int MODEL_IN_HEIGHT   = 224;
   const int MODEL_IN_CHANNELS = 3;
 
-  rknn_context   ctx;
+  rknn_context ctx = 0;
   int            ret;
   int            model_len = 0;
   unsigned char* model;
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
   cv::Mat img = orig_img_rgb.clone();
   if (orig_img.cols != MODEL_IN_WIDTH || orig_img.rows != MODEL_IN_HEIGHT) {
     printf("resize %d %d to %d %d\n", orig_img.cols, orig_img.rows, MODEL_IN_WIDTH, MODEL_IN_HEIGHT);
-    cv::resize(orig_img, img, cv::Size(MODEL_IN_WIDTH, MODEL_IN_HEIGHT), (0, 0), (0, 0), cv::INTER_LINEAR);
+    cv::resize(orig_img, img, cv::Size(MODEL_IN_WIDTH, MODEL_IN_HEIGHT), 0, 0, cv::INTER_LINEAR);
   }
 
   // Load RKNN Model
@@ -228,7 +228,8 @@ int main(int argc, char** argv)
   rknn_outputs_release(ctx, 1, outputs);
 
   // Release
-  if (ctx >= 0) {
+  if (ctx > 0)
+  {
     rknn_destroy(ctx);
   }
   if (model) {

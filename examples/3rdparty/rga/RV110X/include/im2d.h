@@ -754,6 +754,8 @@ IM_API IM_STATUS imconfig(IM_CONFIG_NAME name, uint64_t value);
 
 IM_API im_ctx_id_t imbegin(uint32_t flags);
 
+IM_API IM_STATUS imcancel(im_ctx_id_t id);
+
 #ifdef __cplusplus
 }
 #endif
