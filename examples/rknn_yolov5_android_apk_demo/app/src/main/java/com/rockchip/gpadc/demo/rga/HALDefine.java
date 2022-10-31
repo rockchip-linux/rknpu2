@@ -19,6 +19,6 @@ public class HALDefine {
     public static final int IM_HAL_TRANSFORM_FLIP_H = (1 << 3); // 0x08
 
     // for camera comes with RK3588
-    public static final int CAMERA_PREVIEW_WIDTH = 1280;
-    public static final int CAMERA_PREVIEW_HEIGHT = 720;
+    public static int CAMERA_PREVIEW_WIDTH = 1280;
+    public static int CAMERA_PREVIEW_HEIGHT = 720;
 }

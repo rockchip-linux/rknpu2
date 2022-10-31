@@ -28,7 +28,7 @@ public class InferenceResult {
 
         mPostProcess.init(assetManager);
 
-        mSSDObjectTracker = new ObjectTracker(CAMERA_PREVIEW_WIDTH, CAMERA_PREVIEW_HEIGHT, 3);
+//        mSSDObjectTracker = new ObjectTracker(CAMERA_PREVIEW_WIDTH, CAMERA_PREVIEW_HEIGHT, 3);
     }
 
     public void reset() {
@@ -36,6 +36,7 @@ public class InferenceResult {
             recognitions.clear();
             mIsVaild = true;
         }
+        mSSDObjectTracker = new ObjectTracker(CAMERA_PREVIEW_WIDTH, CAMERA_PREVIEW_HEIGHT, 3);
     }
     public synchronized void setResult(OutputBuffer outputs) {
 

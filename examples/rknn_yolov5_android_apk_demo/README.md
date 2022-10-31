@@ -1,11 +1,11 @@
 # 简介
- - rknn_yolov5_android_apk_demo 是rk356X/RK3588上如何调用NPU的demo，该demo的基础模型是yolov5s
+ - rknn_yolov5_android_apk_demo 是RK356X/RK3588上如何调用NPU的demo，该demo的基础模型是yolov5s
 
 
 
 # 使用说明
 
- - 可以使用android studio 2021.2.1 编译该工程
+ - 可以使用android studio 2021.2.1 （Windows）或者android studio 2021.3.1（Linux/macOS） 编译该工程
  - yolov5s.rknn是使用rknn toolkit2将yolov5s.onnx转换而来，具体转换方法参考rknn toolkit2的examples/onnx/yolov5
 
 
@@ -13,15 +13,19 @@
 # 代码说明
 
 ## 代码分为两大部分：
- - JAVA: com.rockchip.gpadc.demo: 读取camera输入，并调用jni进行inference，请将结果显示出来
+ - JAVA: com.rockchip.gpadc.demo: 读取camera输入，并调用jni进行inference，并将结果显示出来
 
  - JNI: 调用rknnrt进行实际inference
 
+   
+   
+# 权限
+   运行本程序需要Camera及EXTERNAL_STORAGE读写权限
     
 
 # FAQ
 
-## 编译时出现“files found with path 'lib/arm64-v8a/librga.so' from inputs:”类似错误
+## 编译时出现“files found with path 'lib/arm64-v8a/xxx.so' from inputs:”类似错误
 ```
 Execution failed for task ':app:mergeDebugNativeLibs'.
 > A failure occurred while executing com.android.build.gradle.internal.tasks.MergeNativeLibsTask$MergeNativeLibsTaskWorkAction
@@ -35,7 +39,15 @@ Execution failed for task ':app:mergeDebugNativeLibs'.
 > Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights.
 ```
-则需要删除 app/build.gradle中的"jniLibs.srcDirs = ['libs']"，具体原因参考“https://developer.android.com/r/tools/jniLibs-vs-imported-targets”
+或者
+```
+2 files found with path 'lib/arm64-v8a/xxx.so' from inputs:
+ - rknn_yolov5_android_apk_demo/app/build/intermediates/merged_jni_libs/debug/out/arm64-v8a/librga.so
+ - rknn_yolov5_android_apk_demo/app/build/intermediates/cxx/Debug/3f40b265/obj/arm64-v8a/librga.so
+If you are using jniLibs and CMake IMPORTED targets, see
+https://developer.android.com/r/tools/jniLibs-vs-imported-targets
+```
+则需要添加 app/build.gradle中的"jniLibs.srcDirs = ['libs']"，具体原因参考“https://developer.android.com/r/tools/jniLibs-vs-imported-targets”
 
 
 
