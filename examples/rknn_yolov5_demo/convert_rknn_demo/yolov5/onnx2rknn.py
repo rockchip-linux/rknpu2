@@ -11,7 +11,7 @@ if __name__ == '__main__':
     exp = 'yolov5s'
     Width = 640
     Height = 640
-    MODEL_PATH = './onnx_models/yolov5s_rm_transpose.onnx'
+    MODEL_PATH = './onnx_models/bus.onnx'
     NEED_BUILD_MODEL = True
     # NEED_BUILD_MODEL = False
     im_file = './dog_bike_car_640x640.jpg'
