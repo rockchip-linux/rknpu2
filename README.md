@@ -21,4 +21,5 @@ from rknn.api import RKNN
 then use onnx2rknn.py (rknpu2/onnx2rknn.py or rknpu2/examples/rknn_yolov5_demo/convert_rknn_demo/yolov5/onnx2rknn.py )
 
 #to run inference
+see:
 -> rknpu2/examples/rknn_yolov5_demo/
