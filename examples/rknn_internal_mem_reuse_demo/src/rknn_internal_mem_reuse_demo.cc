@@ -340,6 +340,7 @@ int main(int argc, char* argv[])
   rknn_mem_size mem_size[TOTAL_RKNN_MODEL_NUM];
   rknn_input_output_num io_num[TOTAL_RKNN_MODEL_NUM];
   rknn_tensor_mem* internal_mem[TOTAL_RKNN_MODEL_NUM];
+  rknn_tensor_mem *weight_mems[TOTAL_RKNN_MODEL_NUM];
   rknn_tensor_attr input_attrs[TOTAL_RKNN_MODEL_NUM][1]; // this demo only support one input
   rknn_tensor_attr output_attrs[TOTAL_RKNN_MODEL_NUM][MAX_OUTPUT_NUM];
   rknn_tensor_mem* input_mems[TOTAL_RKNN_MODEL_NUM][1];  // this demo only support one input
@@ -367,8 +368,8 @@ int main(int argc, char* argv[])
 
     // Load RKNN Model
     // Init rknn from model path
-    // ret = rknn_init(&ctx[n], model_path[n], 0, RKNN_FLAG_MEM_ALLOC_OUTSIDE, NULL);
-    ret = rknn_init(&ctx[n], model_path[n], 0, 0, NULL);
+    ret = rknn_init(&ctx[n], model_path[n], 0, RKNN_FLAG_MEM_ALLOC_OUTSIDE, NULL);
+    // ret = rknn_init(&ctx[n], model_path[n], 0, 0, NULL);
 
     if (ret < 0) {
       printf("rknn_init fail! ret=%d\n", ret);
@@ -421,7 +422,7 @@ int main(int argc, char* argv[])
       dump_tensor_attr(&input_attrs[n][i]);
     }
 
-    printf("output tensors:\n");    
+    printf("output tensors:\n");
     memset(output_attrs[n], 0, io_num[n].n_output * sizeof(rknn_tensor_attr));
     for (uint32_t i = 0; i < io_num[n].n_output; i++) {
       output_attrs[n][i].index = i;
@@ -452,22 +453,28 @@ int main(int argc, char* argv[])
 
   printf("\033[0;32mMax internal size %d \033[0;0m\n", max_internal_size);
 
-  // Allocate internal memory in outside  
+  // Allocate internal memory in outside
   internal_mem_max = rknn_create_mem(ctx[0], max_internal_size);
 
   for (int n=0; n<TOTAL_RKNN_MODEL_NUM; n++) {
-    internal_mem[n] = rknn_create_mem_from_fd(ctx[n], internal_mem_max->fd, 
-        internal_mem_max->virt_addr, mem_size[n].total_internal_size, 0);
-    // ret = rknn_set_internal_mem(ctx[n], internal_mem[n]);
-    if (ret < 0) {
+    internal_mem[n] = rknn_create_mem_from_fd(ctx[n], internal_mem_max->fd,
+                                              internal_mem_max->virt_addr, mem_size[n].total_internal_size, 0);
+    ret = rknn_set_internal_mem(ctx[n], internal_mem[n]);
+    if (ret < 0)
+    {
       printf("rknn_set_internal_mem fail! ret=%d\n", ret);
       goto out;
     }
 
     printf("internal cma info: virt = %p, phy=0x%lx, fd =%d, size=%d\n", internal_mem[n]->virt_addr, internal_mem[n]->phys_addr, internal_mem[n]->fd, internal_mem[n]->size);
+
+    // 使用rknn_create_mem作为分配器， 分配和设置每个模型的外部weight内存
+    weight_mems[n] = rknn_create_mem(ctx[n], mem_size[n].total_weight_size);
+    rknn_set_weight_mem(ctx[n], weight_mems[n]);
   }
 
-  for (int n=0; n<TOTAL_RKNN_MODEL_NUM; n++) {
+  for (int n = 0; n < TOTAL_RKNN_MODEL_NUM; n++)
+  {
     // Create input tensor memory
     // default input type is int8 (normalize and quantize need compute in outside)
     // if set uint8, will fuse normalize and quantize to npu
@@ -476,12 +483,13 @@ int main(int argc, char* argv[])
     input_attrs[n][0].fmt = input_layout;
 
     input_mems[n][0] = rknn_create_mem(ctx[n], input_attrs[n][0].size_with_stride);
-    
+
     // Set input tensor memory
     ret = rknn_set_io_mem(ctx[n], input_mems[n][0], &input_attrs[n][0]);
-    if (ret < 0) {
+    if (ret < 0)
+    {
       printf("rknn_set_io_mem fail! ret=%d\n", ret);
-        goto out; 
+      goto out;
     }
 
     // Create output tensor memory
@@ -525,10 +533,13 @@ int main(int argc, char* argv[])
     int channel = input_attrs[n][0].dims[3];
     int stride = input_attrs[n][0].w_stride;
 
-    // TODO, you must resize the image if the size of input image  don't match the input shape 
-    if (width == stride) {
+    // TODO, you must resize the image if the size of input image  don't match the input shape
+    if (width == stride)
+    {
       memcpy((char *)(input_mems[n][0]->virt_addr) + input_mems[n][0]->offset, input_data, input_attrs[n][0].dims[2] * input_attrs[n][0].dims[1] * input_attrs[n][0].dims[3]);
-    } else {     
+    }
+    else
+    {
       // copy from src to dst with stride
       uint8_t* src_ptr = input_data;
       uint8_t* dst_ptr = (uint8_t*)input_mems[n][0]->virt_addr+input_mems[n][0]->offset;
@@ -541,11 +552,9 @@ int main(int argc, char* argv[])
         dst_ptr += dst_wc_elems;
       }
     }
-    
+
     STBI_FREE(input_data);
   }
-
-  
 
   // Run
   printf("Begin perf ...\n");
@@ -559,10 +568,10 @@ int main(int argc, char* argv[])
         printf("rknn run error %d\n", ret);
         goto out;
       }
-      
+
       printf("%4d: Elapse Time = %.2fms, FPS = %.2f\n", i, elapse_us / 1000.f, 1000.f * 1000.f / elapse_us);
     }
-    
+
     // Get top 5
     uint32_t topNum = 5;
     for (uint32_t i = 0; i < io_num[n].n_output; i++) {
@@ -606,6 +615,11 @@ out:
 
       if (internal_mem[n]) {
         rknn_destroy_mem(ctx[n], internal_mem[n]);
+      }
+
+      if (weight_mems[n])
+      {
+        rknn_destroy_mem(ctx[n], weight_mems[n]);
       }
 
       // destroy
