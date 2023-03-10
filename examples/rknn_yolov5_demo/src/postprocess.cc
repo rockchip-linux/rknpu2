@@ -222,7 +222,7 @@ static int process(int8_t* input, int* anchor, int grid_h, int grid_w, int heigh
             }
           }
           if (maxClassProbs>thres_i8){
-            objProbs.push_back(sigmoid(deqnt_affine_to_f32(maxClassProbs, zp, scale))* sigmoid(deqnt_affine_to_f32(box_confidence, zp, scale)));
+            objProbs.push_back(sigmoid(deqnt_affine_to_f32(maxClassProbs, zp, scale)) * sigmoid(deqnt_affine_to_f32(box_confidence, zp, scale)));
             classId.push_back(maxClassId);
             validCount++;
             boxes.push_back(box_x);
