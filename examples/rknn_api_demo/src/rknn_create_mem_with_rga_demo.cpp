@@ -15,16 +15,17 @@
 /*-------------------------------------------
                 Includes
 -------------------------------------------*/
-#include "RgaUtils.h"
-#include "im2d.h"
-#include "rga.h"
-#include "rknn_api.h"
 
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+
+#include "RgaUtils.h"
+#include "im2d.h"
+#include "rga.h"
+#include "rknn_api.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"

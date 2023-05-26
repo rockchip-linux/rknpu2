@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-project(rknn_common_test)
+project(rknn_benchmark)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
@@ -26,11 +26,13 @@ else()
 endif()
 include_directories(${RKNN_API_PATH}/include)
 
+include_directories(${CMAKE_SOURCE_DIR}/../3rdparty)
 
 set(CMAKE_INSTALL_RPATH "lib")
 
 add_executable(rknn_benchmark
         src/rknn_benchmark.cpp
+        src/cnpy/cnpy.cpp
 )
 
 target_link_libraries(rknn_benchmark

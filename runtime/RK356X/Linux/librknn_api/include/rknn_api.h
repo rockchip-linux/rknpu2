@@ -56,6 +56,9 @@ extern "C" {
 /* get fence fd from inside */
 #define RKNN_FLAG_FENCE_OUT_OUTSIDE             0x00000080
 
+/* dummy init flag: could only get total_weight_size and total_internal_size by rknn_query*/
+#define RKNN_FLAG_COLLECT_MODEL_INFO_ONLY       0x00000100
+
 /*
     Error code returned by the RKNN API.
 */
@@ -81,7 +84,7 @@ extern "C" {
 #define RKNN_MAX_DIMS                           16      /* maximum dimension of tensor. */
 #define RKNN_MAX_NUM_CHANNEL                    15      /* maximum channel number of input tensor. */
 #define RKNN_MAX_NAME_LEN                       256     /* maximum name lenth of tensor. */
-
+#define RKNN_MAX_DYNAMIC_SHAPE_NUM              512     /* maximum number of dynamic shape for each input. */
 
 #ifdef __arm__
 typedef uint32_t rknn_context;
@@ -117,6 +120,10 @@ typedef enum _rknn_query_cmd {
     RKNN_QUERY_NATIVE_NHWC_OUTPUT_ATTR = 11,                /* query the attribute of native output tensor. */
 
     RKNN_QUERY_DEVICE_MEM_INFO = 12,                        /* query the attribute of rknn memory information. */
+
+    RKNN_QUERY_INPUT_DYNAMIC_RANGE = 13,                    /* query the dynamic shape range of rknn input tensor. */
+    RKNN_QUERY_CURRENT_INPUT_ATTR = 14,                     /* query the current shape of rknn input tensor, only valid for dynamic rknn model*/
+    RKNN_QUERY_CURRENT_OUTPUT_ATTR = 15,                    /* query the current shape of rknn output tensor, only valid for dynamic rknn model*/
 
     RKNN_QUERY_CMD_MAX
 } rknn_query_cmd;
@@ -257,6 +264,17 @@ typedef struct _rknn_tensor_attr {
                                                            Note: it is write-only, if it was set to 0, h_stride = height. */
 } rknn_tensor_attr;
 
+typedef struct _rknn_input_range {
+    uint32_t index;                                                 /* input parameter, the index of input/output tensor,
+                                                                        need set before call rknn_query. */
+    uint32_t shape_number;                                          /* the number of shape. */
+    rknn_tensor_format fmt;                                         /* the data format of tensor. */
+    char name[RKNN_MAX_NAME_LEN];                                   /* the name of tensor. */
+    uint32_t dyn_range[RKNN_MAX_DYNAMIC_SHAPE_NUM][RKNN_MAX_DIMS];  /* the dynamic input dimensions range. */
+    uint32_t n_dims;                                                /* the number of dimensions. */
+
+} rknn_input_range;
+
 /*
     the information for RKNN_QUERY_PERF_DETAIL.
 */
@@ -364,8 +382,8 @@ typedef struct _rknn_output {
 */
 typedef struct _rknn_init_extend {
     rknn_context ctx;                                    /* rknn context */
-    int32_t      real_model_offset;                      /* real rknn model file size, only valid when init context with rknn file path */
-    uint32_t     real_model_size;                        /* real rknn model file offset, only valid when init context with rknn file path */
+    int32_t      real_model_offset;                      /* real rknn model file offset, only valid when init context with rknn file path */
+    uint32_t     real_model_size;                        /* real rknn model file size, only valid when init context with rknn file path */
     uint8_t      reserved[120];                          /* reserved */
 } rknn_init_extend;
 
@@ -660,6 +678,17 @@ int rknn_set_internal_mem(rknn_context ctx, rknn_tensor_mem *mem);
 */
 int rknn_set_io_mem(rknn_context ctx, rknn_tensor_mem *mem, rknn_tensor_attr *attr);
 
+/*  rknn_set_input_shape
+
+    set the input tensor shape (only valid for dynamic shape rknn model).
+
+    input:
+        rknn_context ctx            the handle of context.
+        rknn_tensor_attr *attr      the attribute of input or output tensor buffer.
+    return:
+        int                         error code.
+*/
+int rknn_set_input_shape(rknn_context ctx, rknn_tensor_attr* attr);
 
 #ifdef __cplusplus
 } //extern "C"

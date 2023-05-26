@@ -39,10 +39,16 @@
 
 static void dump_tensor_attr(rknn_tensor_attr* attr)
 {
-  printf("  index=%d, name=%s, n_dims=%d, dims=[%d, %d, %d, %d], n_elems=%d, size=%d, fmt=%s, type=%s, qnt_type=%s, "
+  std::string shape_str = attr->n_dims < 1 ? "" : std::to_string(attr->dims[0]);
+  for (int i = 1; i < attr->n_dims; ++i) {
+    shape_str += ", " + std::to_string(attr->dims[i]);
+  }
+
+  printf("  index=%d, name=%s, n_dims=%d, dims=[%s], n_elems=%d, size=%d, w_stride = %d, size_with_stride=%d, fmt=%s, "
+         "type=%s, qnt_type=%s, "
          "zp=%d, scale=%f\n",
-         attr->index, attr->name, attr->n_dims, attr->dims[0], attr->dims[1], attr->dims[2], attr->dims[3],
-         attr->n_elems, attr->size, get_format_string(attr->fmt), get_type_string(attr->type),
+         attr->index, attr->name, attr->n_dims, shape_str.c_str(), attr->n_elems, attr->size, attr->w_stride,
+         attr->size_with_stride, get_format_string(attr->fmt), get_type_string(attr->type),
          get_qnt_type_string(attr->qnt_type), attr->zp, attr->scale);
 }
 

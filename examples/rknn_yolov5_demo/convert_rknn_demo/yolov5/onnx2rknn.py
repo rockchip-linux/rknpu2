@@ -20,10 +20,12 @@ if __name__ == '__main__':
     rknn = RKNN()
 
     OUT_DIR = "rknn_models"
-    RKNN_MODEL_PATH = './{}/{}_rm_transpose.rknn'.format(OUT_DIR,exp+'-'+str(Width)+'-'+str(Height))
+    RKNN_MODEL_PATH = './{}/{}_rm_transpose_{}.rknn'.format(
+        OUT_DIR, exp+'-'+str(Width)+'-'+str(Height), platform)
     if NEED_BUILD_MODEL:
         DATASET = './dataset.txt'
-        rknn.config(mean_values=[[0, 0, 0]], std_values=[[255, 255, 255]], target_platform="rk3588")
+        rknn.config(mean_values=[[0, 0, 0]], std_values=[
+                    [255, 255, 255]], target_platform=platform)
         # Load model
         print('--> Loading model')
         ret = rknn.load_onnx(MODEL_PATH)

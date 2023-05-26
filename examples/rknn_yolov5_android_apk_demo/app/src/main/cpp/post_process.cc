@@ -182,12 +182,14 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
                             maxClassProbs = prob;
                         }
                     }
-                    if (maxClassProbs>thres_i8){
+                    float max_class_prob = deqnt_affine_to_f32(maxClassProbs, zp, scale);
+                    float box_prob = deqnt_affine_to_f32(box_confidence, zp, scale);
+                    if (max_class_prob * box_prob > threshold){
                         boxes.push_back(box_x);
                         boxes.push_back(box_y);
                         boxes.push_back(box_w);
                         boxes.push_back(box_h);
-                        objProbs.push_back(sigmoid(deqnt_affine_to_f32(maxClassProbs, zp, scale))* sigmoid(deqnt_affine_to_f32(box_confidence, zp, scale)));
+                        objProbs.push_back(sigmoid(max_class_prob * box_prob));
                         classId.push_back(maxClassId);
                         validCount++;
                     }

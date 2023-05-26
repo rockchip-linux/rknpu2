@@ -72,4 +72,6 @@ export LD_LIBRARY_PATH=./lib
 
 # Note
  - You may need to update libmpimmz.so and its header file of this project according to the implementation of MMZ in the system.
- - You may need to update librga.so and its header file of this project according to the implementation of RGA in the system. https://github.com/airockchip/librga
+ - You may need to update librga.so and its header file of this project according to the implementation of RGA in the system. https://github.com/airockchip/librga.
+    For rk3562, the librga version need to be 1.9.1 or higher.
+ - You may need to use r19c or older version of ndk for compiling with MMZ related demo.

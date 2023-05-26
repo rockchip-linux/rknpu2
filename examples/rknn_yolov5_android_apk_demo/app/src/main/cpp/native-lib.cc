@@ -106,23 +106,6 @@ Java_com_rockchip_gpadc_demo_yolo_InferenceWrapper_native_1post_1process(JNIEnv 
 }
 
 extern "C"
-JNIEXPORT jint JNICALL
-Java_com_rockchip_gpadc_demo_rga_RGA_color_1convert(JNIEnv *env, jclass clazz, jbyteArray src,
-													jint src_fmt, jbyteArray dst, jint dst_fmt,
-													jint width, jint height, jint flip) {
-	jboolean copy = JNI_FALSE;
-	jbyte* src_buf = env->GetByteArrayElements(src, &copy);
-	jbyte* dst_buf = env->GetByteArrayElements(dst, &copy);
-
-	colorConvert(src_buf, src_fmt, dst_buf, dst_fmt, width, height, flip);
-
-	env->ReleaseByteArrayElements(src, src_buf, 0);
-	env->ReleaseByteArrayElements(dst, dst_buf, 0);
-
-	return 0;
-}
-
-extern "C"
 JNIEXPORT jlong JNICALL Java_com_rockchip_gpadc_demo_tracker_ObjectTracker_native_1create
                                                             (JNIEnv * env, jobject obj) {
     return create_tracker();
@@ -182,4 +165,21 @@ JNIEXPORT void JNICALL Java_com_rockchip_gpadc_demo_tracker_ObjectTracker_native
 	env->ReleaseIntArrayElements(track_output_class, c_track_output_class, 0);
     env->ReleaseFloatArrayElements(track_output_score, c_track_output_score, 0);
 	env->ReleaseIntArrayElements(track_output_id, c_track_output_id, 0);
+}
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_rockchip_gpadc_demo_rga_RGA_color_1convert_1and_1flip(JNIEnv *env, jclass clazz,
+                                                               jbyteArray src, jint src_fmt,
+                                                               jbyteArray dst, jint dst_fmt,
+                                                               jint width, jint height, jint flip) {
+	jboolean copy = JNI_FALSE;
+	jbyte* src_buf = env->GetByteArrayElements(src, &copy);
+	jbyte* dst_buf = env->GetByteArrayElements(dst, &copy);
+
+	jint ret = colorConvertAndFlip(src_buf, src_fmt, dst_buf, dst_fmt, width, height, flip);
+
+	env->ReleaseByteArrayElements(src, src_buf, 0);
+	env->ReleaseByteArrayElements(dst, dst_buf, 0);
+
+	return ret;
 }

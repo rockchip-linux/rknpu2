@@ -5,6 +5,7 @@
   - RK3566/RK3568
   - RK3588/RK3588S
   - RV1103/RV1106
+  - RK3562
 
 Note:
       The rknn model must be generated using RKNN Toolkit 2:  https://github.com/rockchip-linux/rknn-toolkit2
@@ -19,7 +20,24 @@ Note:
 
 ## ReleaseLog
 
+# 1.5.0
+
+- Support RK3562
+- Support more NPU operator fuse, such as Conv-Silu/Conv-Swish/Conv-Hardswish/Conv-sigmoid/Conv-HardSwish/Conv-Gelu ..
+- Improve support for  NHWC output layout
+- RK3568/RK3588：The maximum input resolution up to 8192
+- Improve support for Swish/DataConvert/Softmax/Lstm/LayerNorm/Gather/Transpose/Mul/Maxpool/Sigmoid/Pad
+- Improve support for CPU operators (Cast, Sin, Cos, RMSNorm, ScalerND, GRU)
+- Limited support for dynamic resolution
+- Provide MATMUL API
+- Add RV1103/RV1106 rknn_server application as proxy between PC and board
+- Add more examples such as rknn_dynamic_shape_input_demo and video demo for yolov5
+- Bug fix
+
+
+
 ### 1.4.0
+
 - Support more NPU operators, such as Reshape、Transpose、MatMul、 Max、Min、exGelu、exSoftmax13、Resize etc.
 - Add **Weight Share**  function, reduce memory usage.
 - Add **Weight Compression** function, reduce memory and bandwidth usage.(RK3588/RV1103/RV1106)

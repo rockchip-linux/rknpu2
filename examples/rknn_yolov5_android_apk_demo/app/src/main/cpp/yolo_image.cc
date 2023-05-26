@@ -24,6 +24,7 @@
 #include "yolo_image.h"
 #include "rga/rga.h"
 #include "rga/im2d.h"
+#include "rga/im2d_version.h"
 #include "post_process.h"
 
 //#define DEBUG_DUMP
@@ -36,17 +37,11 @@ int g_inf_count = 0;
 int g_post_count = 0;
 
 rknn_context ctx = 0;
-//RKRGAProxy *rga = new RKRGAProxy();
 
 bool created = false;
 
-const int input_index = 0;
-const int output_index0 = 0;
-const int output_index1 = 1;
-
 int img_width = 0;    // the width of the actual input image
 int img_height = 0;   // the height of the actual input image
-int img_channel = 0;  // the channel of the actual input image
 
 int m_in_width = 0;   // the width of the RKNN model input
 int m_in_height = 0;  // the height of the RKNN model input
@@ -55,8 +50,8 @@ int m_in_channel = 0; // the channel of the RKNN model input
 float scale_w = 0.0;
 float scale_h = 0.0;
 
-int n_input = 1;
-int n_output = 3;
+uint32_t n_input = 1;
+uint32_t n_output = 3;
 
 rknn_tensor_attr input_attrs[1];
 rknn_tensor_attr output_attrs[3];
@@ -77,9 +72,13 @@ int create(int im_height, int im_width, int im_channel, char *model_path)
 {
     img_height = im_height;
     img_width = im_width;
-    img_channel = im_channel;
 
-    LOGI("try rknn_init!");
+    LOGI("try rknn_init!")
+
+    // 0. RGA version check
+    LOGI("RGA API Version: %s", RGA_API_VERSION)
+    // Please refer to the link to confirm the RGA driver version, make sure it is higher than 1.2.4
+    // https://github.com/airockchip/librga/blob/main/docs/Rockchip_FAQ_RGA_CN.md#rga-driver
 
     // 1. Load model
     FILE *fp = fopen(model_path, "rb");
@@ -100,7 +99,7 @@ int create(int im_height, int im_width, int im_channel, char *model_path)
 
     fclose(fp);
 
-    // 2. Init rknn model
+    // 2. Init RKNN model
     int ret = rknn_init(&ctx, model, model_len, 0, nullptr);
     free(model);
 
@@ -113,11 +112,13 @@ int create(int im_height, int im_width, int im_channel, char *model_path)
     rknn_input_output_num io_num;
     rknn_query_cmd cmd = RKNN_QUERY_IN_OUT_NUM;
     // 3.1 Query input/output num.
-//    ret = rknn_query(ctx, cmd, &io_num, sizeof(io_num));
-//    if (ret != RKNN_SUCC) {
-//        LOGE("rknn_query io_num fail!ret=%d\n", ret);
-//        return -1;
-//    }
+    ret = rknn_query(ctx, cmd, &io_num, sizeof(io_num));
+    if (ret != RKNN_SUCC) {
+        LOGE("rknn_query io_num fail!ret=%d\n", ret);
+        return -1;
+    }
+    n_input = io_num.n_input;
+    n_output = io_num.n_output;
 
     // 3.2 Query input attributes
     memset(input_attrs, 0, n_input * sizeof(rknn_tensor_attr));
@@ -167,8 +168,8 @@ int create(int im_height, int im_width, int im_channel, char *model_path)
     // 4. Set input/output buffer
     // 4.1 Set inputs memory
     // 4.1.1 Create input tensor memory, input data type is INT8, yolo has only 1 input.
-    input_mems[0] = rknn_create_mem(ctx, input_attrs[0].n_elems * sizeof(char));
-    memset(input_mems[0]->virt_addr, 0, input_attrs[0].n_elems * sizeof(char));
+    input_mems[0] = rknn_create_mem(ctx, input_attrs[0].size_with_stride * sizeof(char));
+    memset(input_mems[0]->virt_addr, 0, input_attrs[0].size_with_stride * sizeof(char));
     // 4.1.2 Update input attrs
     input_attrs[0].index = 0;
     input_attrs[0].type = RKNN_TENSOR_UINT8;
@@ -201,7 +202,7 @@ int create(int im_height, int im_width, int im_channel, char *model_path)
 
     created = true;
 
-//    LOGI("rknn_init success!");
+    LOGI("rknn_init success!");
 
     return 0;
 }
@@ -235,6 +236,7 @@ bool run_yolo(char *inDataRaw, char *y0, char *y1, char *y2)
     g_rga_src = wrapbuffer_virtualaddr((void *)inDataRaw, img_width, img_height,
                                        RK_FORMAT_RGBA_8888);
 
+    // convert color format and resize. RGA8888 -> RGB888
     ret = imresize(g_rga_src, g_rga_dst);
     if (IM_STATUS_SUCCESS != ret) {
         LOGE("run_yolo: resize image with rga failed: %s\n", imStrError((IM_STATUS)ret));
@@ -272,10 +274,14 @@ bool run_yolo(char *inDataRaw, char *y0, char *y1, char *y2)
     inputs[0].fmt = RKNN_TENSOR_NHWC;
     inputs[0].pass_through = 0;
     inputs[0].buf = g_rga_dst.vir_addr;
+#ifdef EVAL_TIME
     gettimeofday(&start_time, NULL);
+#endif
     rknn_inputs_set(ctx, 1, inputs);
+#ifdef EVAL_TIME
     gettimeofday(&stop_time, NULL);
     LOGI("rknn_inputs_set use %f ms\n", (__get_us(stop_time) - __get_us(start_time)) / 1000);
+#endif
 #endif
 
 #ifdef EVAL_TIME
@@ -394,45 +400,38 @@ int yolo_post_process(char *grid0_buf, char *grid1_buf, char *grid2_buf,
     return count;
 }
 
-int colorConvert(void *src, int srcFmt, void *dst,  int dstFmt, int width, int height, int flip) {
+int colorConvertAndFlip(void *src, int srcFmt, void *dst,  int dstFmt, int width, int height, int flip) {
     int ret;
-    int src_len = width * height * 3 / 2;
+    // RGA needs to ensure page alignment when using virtual addresses, otherwise it may cause
+    // internal cache flushing errors. Manually modify src/dst buf to force its 4k alignment.
+    // TODO -- convert color format and flip with OpenGL.
+    int src_len = width * height * 3 / 2;    // yuv420 buffer length.
     void *src_ = malloc(src_len + 4096);
     void *org_src = src_;
     memset(src_, 0, src_len + 4096);
-//    LOGI("src addr: %p", src_)
     src_ = (void *)((((int64_t)src_ >> 12) + 1) << 12);
-//    LOGI("after src addr: %p", src_)
     memcpy(src_, src, src_len);
-    int dst_len = width * height * 4;
+    int dst_len = width * height * 4;    // rgba buffer length.
     void *dst_ = malloc(dst_len + 4096);
     void *org_dst = dst_;
     memset(dst_, 0, dst_len + 4096);
-//    LOGI("dst addr: %p", dst_)
     dst_ = (void *)((((int64_t)dst_ >> 12) + 1) << 12);
-//    LOGI("after dst addr: %p", dst_)
     rga_buffer_t rga_src = wrapbuffer_virtualaddr((void *)src_, width, height, srcFmt);
     rga_buffer_t rga_dst = wrapbuffer_virtualaddr((void *)dst_, width, height, dstFmt);
 
-
-//    LOGI("src addr: %p", src_)
-//    LOGI("dst addr: %p", dst_)
-
     if (DO_NOT_FLIP == flip) {
-        ret = imcvtcolor(rga_src, rga_dst, srcFmt, dstFmt);
+        // convert color format
+        ret = imcvtcolor(rga_src, rga_dst, rga_src.format, rga_dst.format);
     } else {
-        // convert color and flip.
+        // convert color format and flip.
         ret = imflip(rga_src, rga_dst, flip);
     }
 
     if (IM_STATUS_SUCCESS != ret) {
-        LOGE("colorConvert failed. Ret: %s\n", imStrError((IM_STATUS)ret));
+        LOGE("colorConvertAndFlip failed. Ret: %s\n", imStrError((IM_STATUS)ret));
     }
 
     memcpy(dst, dst_, dst_len);
-//    LOGI("src last byte: %d", *((unsigned char *)src + 460800 - 1))
-//    LOGI("dst last byte: %d", *((unsigned char *)dst + 1228800 - 1))
-//    LOGI("org_src addr: %p, org_dst addr: %p", org_src, org_dst)
     free(org_src);
     free(org_dst);
 

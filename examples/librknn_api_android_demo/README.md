@@ -4,7 +4,7 @@ Android平台有两种方式来调用RKNN API
 2）应用链接Android平台HIDL实现的librknn_api_android.so
 对于需要通过CTS/VTS测试的Android设备可以使用基于Android平台HIDL实现的RKNN API。如果不需要通过CTS/VTS测试的设备建议直接链接使用librknnrt.so，对各个接口调用流程的链路更短，可以提供更好的性能。
 
-对于使用Android HIDL实现的RKNN API的代码位于RK356X/RK3588 Android系统SDK的vendor/rockchip/hardware/interfaces/neuralnetworks目录下。当完成Android系统编译后，将会生成一些NPU相关的库（对于应用只需要链接使用librknn_api_android.so即可）
+对于使用Android HIDL实现的RKNN API的代码位于RK3566_RK3568/RK3588 Android系统SDK的vendor/rockchip/hardware/interfaces/neuralnetworks目录下。当完成Android系统编译后，将会生成一些NPU相关的库（对于应用只需要链接使用librknn_api_android.so即可）
 
 **本示例适用于librknn_api_android.so。**
 
@@ -14,13 +14,13 @@ Android平台有两种方式来调用RKNN API
 
 - 编译librknn_api_android.so
 
-    需要先下载RK356X/RK3588 Android SDK，在Android SDK根目录执行
+    需要先下载RK3566_RK3568/RK3588 Android SDK，在Android SDK根目录执行
 
     ```
     source build/envsetup.sh
     lunch your target ##需要根据自己的实际情况进行选择
     mmm vendor/rockchip/hardware/interfaces/neuralnetworks/ -j16
-    
+
     ```
 
     将生成
@@ -36,7 +36,6 @@ Android平台有两种方式来调用RKNN API
     /vendor/bin/hw/rockchip.hardware.neuralnetworks@1.0-service
     ```
 
-    
 
 -  编译本demo
 
@@ -45,20 +44,20 @@ Android平台有两种方式来调用RKNN API
     ```
     mmm rknpu2/examples/librknn_api_android_demo
     ```
-    
+
     将生成的vendor/bin/rknn_create_mem_demo
-    
+
 # 运行
 
 
 - 将rknn_create_mem_demo推到板子/vendor/bin/目录
 
 - 将model推到板子/data/目录
-  
+
 - 确保板子的rockchip.hardware.neuralnetworks@1.0-service已经运行
-  
+
 ```
-    rknn_create_mem_demo /data/model/RK356X/mobilenet_v1.rknn /data/model/dog_224x224.jpg
+    rknn_create_mem_demo /data/model/RK3566_RK3568/mobilenet_v1.rknn /data/model/dog_224x224.jpg
 ```
 
 

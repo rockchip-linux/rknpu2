@@ -206,6 +206,12 @@ int main(int argc, char* argv[])
     return -1;
   }
 
+  ret = rknn_run(ctx, NULL);
+  if (ret < 0) {
+    printf("rknn_run fail! ret=%d\n", ret);
+    return -1;
+  }
+
   // Get output
   rknn_output outputs[io_num.n_output];
   memset(outputs, 0, io_num.n_output * sizeof(rknn_output));

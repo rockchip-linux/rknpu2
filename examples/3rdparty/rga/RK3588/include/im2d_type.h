@@ -21,6 +21,29 @@
 
 #include <stdint.h>
 
+#include "rga.h"
+
+#define IM_API /* define API export as needed */
+
+#ifdef __cplusplus
+#define IM_C_API extern "C"
+#define IM_EXPORT_API extern "C"
+#else
+#define IM_C_API
+#define IM_EXPORT_API
+#endif
+
+#ifdef __cplusplus
+#define DEFAULT_INITIALIZER(x) = x
+#else
+#define DEFAULT_INITIALIZER(x)
+#endif
+
+typedef uint32_t im_api_version_t;
+typedef uint32_t im_job_handle_t;
+typedef uint32_t im_ctx_id_t;
+typedef uint32_t rga_buffer_handle_t;
+
 typedef enum {
     /* Rotation */
     IM_HAL_TRANSFORM_ROT_90     = 1 << 0,
@@ -98,6 +121,12 @@ typedef enum {
     IM_MOSAIC_64                = 0x3,
     IM_MOSAIC_128               = 0x4,
 } IM_MOSAIC_MODE;
+
+typedef enum {
+    IM_BORDER_CONSTANT = 0,             /* iiiiii|abcdefgh|iiiiiii with some specified value 'i' */
+    IM_BORDER_REFLECT = 2,              /* fedcba|abcdefgh|hgfedcb */
+    IM_BORDER_WRAP = 3,                 /* cdefgh|abcdefgh|abcdefg */
+} IM_BORDER_TYPE;
 
 /* Status codes, returned by any blit function */
 typedef enum {
@@ -228,10 +257,6 @@ typedef enum {
     IM_STATUS_ERROR_VERSION     = -5,
     IM_STATUS_FAILED            =  0,
 } IM_STATUS;
-
-typedef uint32_t im_api_version_t;
-typedef uint32_t im_ctx_id_t;
-typedef uint32_t rga_buffer_handle_t;
 
 /* Rectangle definition */
 typedef struct {
@@ -383,7 +408,7 @@ typedef struct im_intr_config {
 } im_intr_config_t;
 
 typedef struct im_opt {
-    im_api_version_t version;
+    im_api_version_t version DEFAULT_INITIALIZER(RGA_CURRENT_API_HEADER_VERSION);
 
     int color;                          /* color, used by color fill */
     im_colorkey_range colorkey_range;   /* range value of color key */
@@ -402,16 +427,10 @@ typedef struct im_opt {
     char reserve[128];
 } im_opt_t;
 
-typedef struct im_context {
-    int priority;
-    IM_SCHEDULER_CORE core;
-    int check_mode;
-} im_context_t;
-
 typedef struct im_handle_param {
     uint32_t width;
     uint32_t height;
     uint32_t format;
-}im_handle_param_t;
+} im_handle_param_t;
 
 #endif /* _RGA_IM2D_TYPE_H_ */

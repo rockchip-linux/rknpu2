@@ -1,10 +1,7 @@
 package com.rockchip.gpadc.demo;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -15,13 +12,9 @@ import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.graphics.Typeface;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
@@ -118,6 +111,8 @@ public class CameraPreviewActivity extends Activity implements Camera.PreviewCal
             createFile(mModelName, R.raw.yolov5s_rk3588);
         } else if (platform.equals("rk356x")) {
             createFile(mModelName, R.raw.yolov5s_rk3566);
+        } else if (platform.equals("rk3562")) {
+            createFile(mModelName, R.raw.yolov5s_rk3562);
         } else {
             Toast toast = Toast.makeText(this, "Can not get platform use RK3588 instead.", Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER, 0, 0);
@@ -190,7 +185,9 @@ public class CameraPreviewActivity extends Activity implements Camera.PreviewCal
         ImageBufferQueue.ImageBuffer imageBuffer = mImageBufferQueue.getFreeBuffer();
 
         if (imageBuffer != null) {
-            RGA.colorConvert(data, RK_FORMAT_YCrCb_420_SP,
+            // RK_FORMAT_YCrCb_420_SP -> RK_FORMAT_RGBA_8888
+            // flip for CAMERA_FACING_FRONT
+            RGA.colorConvertAndFlip(data, RK_FORMAT_YCrCb_420_SP,
                     imageBuffer.mImage, RK_FORMAT_RGBA_8888,
                     CAMERA_PREVIEW_WIDTH, CAMERA_PREVIEW_HEIGHT, this.flip);
 
@@ -347,7 +344,9 @@ public class CameraPreviewActivity extends Activity implements Camera.PreviewCal
 
         mStopInference = true;
         try {
-            mInferenceThread.join();
+            if (mInferenceThread != null) {
+                mInferenceThread.join();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

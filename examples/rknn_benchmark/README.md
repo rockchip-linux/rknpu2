@@ -2,7 +2,7 @@ rknn_benchmark is used to test the performance of the rknn model. Please make su
 
 Usage:
 
-./rknn_benchmark xxx.rknn  [loop_count] [core_mask]
+./rknn_benchmark xxx.rknn [input_data]  [loop_count] [core_mask]
 
 core_mask: 0: auto, 1: npu core1, 2: npu core2, 4:npu core3, 
 
@@ -16,8 +16,9 @@ Such as:
 
 ```
 ./rknn_benchmark mobilenet_v1.rknn
-./rknn_benchmark mobilenet_v1.rknn 10 3
-./rknn_benchmark mobilenet_v1.rknn 10 7
+./rknn_benchmark mobilenet_v1.rknn dog.jpg 10 3
+./rknn_benchmark mobilenet_v1.rknn dog.npy 10 7
+./rknn_benchmark xxx.rknn input1.npy#input2.npy
 ```
 
 
