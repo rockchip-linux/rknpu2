@@ -1,0 +1,8 @@
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/build_linux_aarch64/CMakeFiles/rknn_yolov5_demo.dir
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/build_linux_aarch64/CMakeFiles/rknn_yolov5_video_demo.dir
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/build_linux_aarch64/CMakeFiles/edit_cache.dir
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/build_linux_aarch64/CMakeFiles/rebuild_cache.dir
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/build_linux_aarch64/CMakeFiles/list_install_components.dir
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/build_linux_aarch64/CMakeFiles/install.dir
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/build_linux_aarch64/CMakeFiles/install/local.dir
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/build_linux_aarch64/CMakeFiles/install/strip.dir

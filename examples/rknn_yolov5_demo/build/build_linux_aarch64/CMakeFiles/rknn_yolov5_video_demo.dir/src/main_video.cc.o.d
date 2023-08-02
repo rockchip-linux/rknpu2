@@ -1,0 +1,166 @@
+CMakeFiles/rknn_yolov5_video_demo.dir/src/main_video.cc.o: \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/src/main_video.cc \
+ /usr/include/stdc-predef.h /usr/include/dlfcn.h /usr/include/features.h \
+ /usr/include/features-time64.h \
+ /usr/include/aarch64-linux-gnu/bits/wordsize.h \
+ /usr/include/aarch64-linux-gnu/bits/timesize.h \
+ /usr/include/aarch64-linux-gnu/sys/cdefs.h \
+ /usr/include/aarch64-linux-gnu/bits/long-double.h \
+ /usr/include/aarch64-linux-gnu/gnu/stubs.h \
+ /usr/include/aarch64-linux-gnu/gnu/stubs-lp64.h \
+ /usr/lib/gcc/aarch64-linux-gnu/11/include/stddef.h \
+ /usr/include/aarch64-linux-gnu/bits/dlfcn.h \
+ /usr/include/aarch64-linux-gnu/bits/dl_find_object.h \
+ /usr/include/stdio.h \
+ /usr/include/aarch64-linux-gnu/bits/libc-header-start.h \
+ /usr/lib/gcc/aarch64-linux-gnu/11/include/stdarg.h \
+ /usr/include/aarch64-linux-gnu/bits/types.h \
+ /usr/include/aarch64-linux-gnu/bits/typesizes.h \
+ /usr/include/aarch64-linux-gnu/bits/time64.h \
+ /usr/include/aarch64-linux-gnu/bits/types/__fpos_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/__mbstate_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/__fpos64_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/__FILE.h \
+ /usr/include/aarch64-linux-gnu/bits/types/FILE.h \
+ /usr/include/aarch64-linux-gnu/bits/types/struct_FILE.h \
+ /usr/include/aarch64-linux-gnu/bits/types/cookie_io_functions_t.h \
+ /usr/include/aarch64-linux-gnu/bits/stdio_lim.h \
+ /usr/include/aarch64-linux-gnu/bits/floatn.h \
+ /usr/include/aarch64-linux-gnu/bits/floatn-common.h \
+ /usr/include/c++/11/stdlib.h /usr/include/c++/11/cstdlib \
+ /usr/include/aarch64-linux-gnu/c++/11/bits/c++config.h \
+ /usr/include/aarch64-linux-gnu/c++/11/bits/os_defines.h \
+ /usr/include/aarch64-linux-gnu/c++/11/bits/cpu_defines.h \
+ /usr/include/stdlib.h /usr/include/aarch64-linux-gnu/bits/waitflags.h \
+ /usr/include/aarch64-linux-gnu/bits/waitstatus.h \
+ /usr/include/aarch64-linux-gnu/bits/types/locale_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/__locale_t.h \
+ /usr/include/aarch64-linux-gnu/sys/types.h \
+ /usr/include/aarch64-linux-gnu/bits/types/clock_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/clockid_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/time_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/timer_t.h \
+ /usr/include/aarch64-linux-gnu/bits/stdint-intn.h /usr/include/endian.h \
+ /usr/include/aarch64-linux-gnu/bits/endian.h \
+ /usr/include/aarch64-linux-gnu/bits/endianness.h \
+ /usr/include/aarch64-linux-gnu/bits/byteswap.h \
+ /usr/include/aarch64-linux-gnu/bits/uintn-identity.h \
+ /usr/include/aarch64-linux-gnu/sys/select.h \
+ /usr/include/aarch64-linux-gnu/bits/select.h \
+ /usr/include/aarch64-linux-gnu/bits/types/sigset_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/__sigset_t.h \
+ /usr/include/aarch64-linux-gnu/bits/types/struct_timeval.h \
+ /usr/include/aarch64-linux-gnu/bits/types/struct_timespec.h \
+ /usr/include/aarch64-linux-gnu/bits/pthreadtypes.h \
+ /usr/include/aarch64-linux-gnu/bits/thread-shared-types.h \
+ /usr/include/aarch64-linux-gnu/bits/pthreadtypes-arch.h \
+ /usr/include/aarch64-linux-gnu/bits/atomic_wide_counter.h \
+ /usr/include/aarch64-linux-gnu/bits/struct_mutex.h \
+ /usr/include/aarch64-linux-gnu/bits/struct_rwlock.h \
+ /usr/include/alloca.h /usr/include/aarch64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/c++/11/bits/std_abs.h /usr/include/string.h \
+ /usr/include/strings.h /usr/include/unistd.h \
+ /usr/include/aarch64-linux-gnu/bits/posix_opt.h \
+ /usr/include/aarch64-linux-gnu/bits/environments.h \
+ /usr/include/aarch64-linux-gnu/bits/confname.h \
+ /usr/include/aarch64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/aarch64-linux-gnu/bits/getopt_core.h \
+ /usr/include/aarch64-linux-gnu/bits/unistd_ext.h \
+ /usr/include/linux/close_range.h \
+ /usr/include/aarch64-linux-gnu/sys/time.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/im2d.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/im2d_version.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/im2d_type.h \
+ /usr/lib/gcc/aarch64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
+ /usr/include/aarch64-linux-gnu/bits/wchar.h \
+ /usr/include/aarch64-linux-gnu/bits/stdint-uintn.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/rga.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/im2d_common.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/im2d_buffer.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/im2d_single.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/im2d_task.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/im2d_mpi.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/rga.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/rga/RK3588/include/RgaUtils.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../../runtime/RK3588/Linux/librknn_api/include/rknn_api.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/include/postprocess.h \
+ /usr/include/c++/11/vector /usr/include/c++/11/bits/stl_algobase.h \
+ /usr/include/c++/11/bits/functexcept.h \
+ /usr/include/c++/11/bits/exception_defines.h \
+ /usr/include/c++/11/bits/cpp_type_traits.h \
+ /usr/include/c++/11/ext/type_traits.h \
+ /usr/include/c++/11/ext/numeric_traits.h \
+ /usr/include/c++/11/bits/stl_pair.h /usr/include/c++/11/bits/move.h \
+ /usr/include/c++/11/type_traits \
+ /usr/include/c++/11/bits/stl_iterator_base_types.h \
+ /usr/include/c++/11/bits/stl_iterator_base_funcs.h \
+ /usr/include/c++/11/bits/concept_check.h \
+ /usr/include/c++/11/debug/assertions.h \
+ /usr/include/c++/11/bits/stl_iterator.h \
+ /usr/include/c++/11/bits/ptr_traits.h /usr/include/c++/11/debug/debug.h \
+ /usr/include/c++/11/bits/predefined_ops.h \
+ /usr/include/c++/11/bits/allocator.h \
+ /usr/include/aarch64-linux-gnu/c++/11/bits/c++allocator.h \
+ /usr/include/c++/11/ext/new_allocator.h /usr/include/c++/11/new \
+ /usr/include/c++/11/bits/exception.h \
+ /usr/include/c++/11/bits/memoryfwd.h \
+ /usr/include/c++/11/bits/stl_construct.h \
+ /usr/include/c++/11/bits/stl_uninitialized.h \
+ /usr/include/c++/11/ext/alloc_traits.h \
+ /usr/include/c++/11/bits/alloc_traits.h \
+ /usr/include/c++/11/bits/stl_vector.h \
+ /usr/include/c++/11/initializer_list \
+ /usr/include/c++/11/bits/stl_bvector.h \
+ /usr/include/c++/11/bits/functional_hash.h \
+ /usr/include/c++/11/bits/hash_bytes.h \
+ /usr/include/c++/11/bits/range_access.h \
+ /usr/include/c++/11/bits/vector.tcc \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/utils/mpp_decoder.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_mpi.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_mpi_cmd.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_vdec_cmd.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_type.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/mpp_err.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_vdec_cfg.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_venc_cmd.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/mpp_frame.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/mpp_buffer.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/mpp_meta.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/mpp_packet.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_venc_rc.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_venc_cfg.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/rk_venc_ref.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/mpp_task.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/mpp/include/rockchip/mpp_frame.h \
+ /usr/include/pthread.h /usr/include/sched.h \
+ /usr/include/aarch64-linux-gnu/bits/sched.h \
+ /usr/include/aarch64-linux-gnu/bits/types/struct_sched_param.h \
+ /usr/include/aarch64-linux-gnu/bits/cpu-set.h /usr/include/time.h \
+ /usr/include/aarch64-linux-gnu/bits/time.h \
+ /usr/include/aarch64-linux-gnu/bits/timex.h \
+ /usr/include/aarch64-linux-gnu/bits/types/struct_tm.h \
+ /usr/include/aarch64-linux-gnu/bits/types/struct_itimerspec.h \
+ /usr/include/aarch64-linux-gnu/bits/setjmp.h \
+ /usr/include/aarch64-linux-gnu/bits/types/struct___jmp_buf_tag.h \
+ /usr/include/aarch64-linux-gnu/bits/pthread_stack_min-dynamic.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/utils/mpp_encoder.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/utils/drawing.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_mediakit.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_common.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_httpclient.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_events_objects.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_tcp.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_media.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_track.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_frame.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_thread.h \
+ /usr/include/assert.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_proxyplayer.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_recorder.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_player.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_pusher.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_events.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_util.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_rtp_server.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_h264_splitter.h \
+ /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/../3rdparty/zlmediakit/include/mk_transcode.h
