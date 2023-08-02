@@ -7,11 +7,11 @@ import os
 
 if __name__ == '__main__':
 
-    platform = 'rk3566'
+    platform = 'rk3588'
     exp = 'yolov5s'
     Width = 640
     Height = 640
-    MODEL_PATH = './onnx_models/yolov5s_rm_transpose.onnx'
+    MODEL_PATH = './onnx_models/best.onnx'
     NEED_BUILD_MODEL = True
     # NEED_BUILD_MODEL = False
     im_file = './dog_bike_car_640x640.jpg'
