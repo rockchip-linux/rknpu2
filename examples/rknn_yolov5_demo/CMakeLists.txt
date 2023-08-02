@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-shlib-undefined")
 
 # install target and libraries
-set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_yolov5_demo_${CMAKE_SYSTEM_NAME})
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_yolov5_linux)
 
 set(CMAKE_SKIP_INSTALL_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
@@ -24,68 +24,90 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR})
 
 # rknn api
-if(TARGET_SOC STREQUAL "rk356x")
-  set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK356X/${CMAKE_SYSTEM_NAME}/librknn_api)
-elseif(TARGET_SOC STREQUAL "rk3588")
-  set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK3588/${CMAKE_SYSTEM_NAME}/librknn_api)
-else()
-  message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588 or rv110x")
-endif()
+#if(TARGET_SOC STREQUAL "rk356x")
+#  set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK356X/${CMAKE_SYSTEM_NAME}/librknn_api)
+#elseif(TARGET_SOC STREQUAL "rk3588")
+#  set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK3588/${CMAKE_SYSTEM_NAME}/librknn_api)
+#else()
+#  message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588 or rv110x")
+#endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-  set(RKNN_RT_LIB ${RKNN_API_PATH}/${CMAKE_ANDROID_ARCH_ABI}/librknnrt.so)
-else()
-  set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
-endif()
+# 修改 更改芯片型号选择，固定为rk3588
+set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK3588/Linux/librknn_api)
+
+#if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+#  set(RKNN_RT_LIB ${RKNN_API_PATH}/${CMAKE_ANDROID_ARCH_ABI}/librknnrt.so)
+#else()
+#  set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
+#endif()
+
+# 修改平台选择，固定位linux
+set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
+# 引入文件夹
 include_directories(${RKNN_API_PATH}/include)
 include_directories(${CMAKE_SOURCE_DIR}/../3rdparty)
 
 # opencv
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/OpenCV-android-sdk/sdk/native/jni/abi-${CMAKE_ANDROID_ARCH_ABI})
-else()
-  if(LIB_ARCH STREQUAL "armhf")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-armhf/share/OpenCV)
-  else()
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-aarch64/share/OpenCV)
-  endif()
-endif()
+# if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+#    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/OpenCV-android-sdk/sdk/native/jni/abi-${CMAKE_ANDROID_ARCH_ABI})
+# else()
+#  if(LIB_ARCH STREQUAL "armhf")
+#    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-armhf/share/OpenCV)
+#  else()
+#    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-aarch64/share/OpenCV)
+#  endif()
+# endif()
+
+#修改opencv版本选择,固定为linux 64位版本
+set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-aarch64/share/OpenCV)
+
 find_package(OpenCV REQUIRED)
 
 #rga
-if(TARGET_SOC STREQUAL "rk356x")
-  set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga/RK356X)
-elseif(TARGET_SOC STREQUAL "rk3588")
-  set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga/RK3588)
-else()
-  message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588")
-endif()
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-  set(RGA_LIB ${RGA_PATH}/lib/Android/${CMAKE_ANDROID_ARCH_ABI}/librga.so)
-else()
-  set(RGA_LIB ${RGA_PATH}/lib/Linux//${LIB_ARCH}/librga.so)
-endif()
+#if(TARGET_SOC STREQUAL "rk356x")
+#  set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga/RK356X)
+#elseif(TARGET_SOC STREQUAL "rk3588")
+#  set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga/RK3588)
+#else()
+#  message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588")
+#endif()
+
+# rga 固定版本
+set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga/RK3588)
+
+#if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+#  set(RGA_LIB ${RGA_PATH}/lib/Android/${CMAKE_ANDROID_ARCH_ABI}/librga.so)
+#else()
+#  set(RGA_LIB ${RGA_PATH}/lib/Linux//${LIB_ARCH}/librga.so)
+#endif()
+
+set(RGA_LIB ${RGA_PATH}/lib/Linux//${LIB_ARCH}/librga.so)
+
 include_directories( ${RGA_PATH}/include)
 
 # mpp
 set(MPP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/mpp)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(MPP_LIBS ${MPP_PATH}/${CMAKE_SYSTEM_NAME}/${LIB_ARCH}/librockchip_mpp.so)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
-  set(MPP_LIBS ${MPP_PATH}/${CMAKE_SYSTEM_NAME}/${CMAKE_ANDROID_ARCH_ABI}/libmpp.so)
-endif()
+#if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+#  set(MPP_LIBS ${MPP_PATH}/${CMAKE_SYSTEM_NAME}/${LIB_ARCH}/librockchip_mpp.so)
+#elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
+#  set(MPP_LIBS ${MPP_PATH}/${CMAKE_SYSTEM_NAME}/${CMAKE_ANDROID_ARCH_ABI}/libmpp.so)
+#endif()
+
+set(MPP_LIBS ${MPP_PATH}/Linux/${LIB_ARCH}/librockchip_mpp.so)
+
+
 include_directories(${MPP_PATH}/include)
 
 # zlmediakit
 set(ZLMEDIAKIT_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/zlmediakit)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+#if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 include_directories(${ZLMEDIAKIT_PATH}/include)
 set(ZLMEDIAKIT_LIBS ${ZLMEDIAKIT_PATH}/${LIB_ARCH}/libmk_api.so)
-endif()
+#endif()
 
-if (ZLMEDIAKIT_LIBS)
-    add_definitions(-DBUILD_VIDEO_RTSP)
-endif()
+# if (ZLMEDIAKIT_LIBS)
+add_definitions(-DBUILD_VIDEO_RTSP)
+# endif()
 
 set(CMAKE_INSTALL_RPATH "lib")
 
@@ -103,7 +125,7 @@ target_link_libraries(rknn_yolov5_demo
   ${OpenCV_LIBS}
 )
 
-if (MPP_LIBS)
+# if (MPP_LIBS)
 add_executable(rknn_yolov5_video_demo
         src/main_video.cc
         src/postprocess.cc
@@ -118,7 +140,7 @@ target_link_libraries(rknn_yolov5_video_demo
   ${MPP_LIBS}
   ${ZLMEDIAKIT_LIBS}
 )
-endif()
+# endif()
 
 
 # install target and libraries
@@ -129,11 +151,11 @@ install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)
 install(PROGRAMS ${RGA_LIB} DESTINATION lib)
 install(DIRECTORY model DESTINATION ./)
 
-if (MPP_LIBS)
+#if (MPP_LIBS)
 install(TARGETS rknn_yolov5_video_demo DESTINATION ./)
 install(PROGRAMS ${MPP_LIBS} DESTINATION lib)
-endif()
+#endif()
 
-if (ZLMEDIAKIT_LIBS)
+# if (ZLMEDIAKIT_LIBS)
 install(PROGRAMS ${ZLMEDIAKIT_LIBS} DESTINATION lib)
-endif()
+# endif()
