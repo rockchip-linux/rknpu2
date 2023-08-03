@@ -1,5 +1,6 @@
 # rknpu2
 ## rknpu2 easy use in rk3588 on linux platform.
+### Ensure that your environment is configured correctly
 
 ## cd ./rknpu2/examples/rknn_yolov5_demo && ./build-linux_RK3588.sh
 
