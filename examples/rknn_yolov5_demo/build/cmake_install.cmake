@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/install/rknn_yolov5_demo_Linux")
+  set(CMAKE_INSTALL_PREFIX "/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/install/")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

@@ -144,7 +144,8 @@ target_link_libraries(rknn_yolov5_video_demo
 
 
 # install target and libraries
-set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_yolov5_demo_${CMAKE_SYSTEM_NAME})
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/)
+
 install(TARGETS rknn_yolov5_demo DESTINATION ./)
 
 install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)
