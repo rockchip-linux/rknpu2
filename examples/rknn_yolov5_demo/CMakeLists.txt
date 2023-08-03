@@ -15,11 +15,11 @@ set(CMAKE_SKIP_INSTALL_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
-if (CMAKE_C_COMPILER MATCHES "aarch64")
-  set(LIB_ARCH aarch64)
-else()
-  set(LIB_ARCH armhf)
-endif()
+#if (CMAKE_C_COMPILER MATCHES "aarch64")
+set(LIB_ARCH aarch64)
+#else()
+  #set(LIB_ARCH armhf)
+#endif()
 
 include_directories(${CMAKE_SOURCE_DIR})
 
@@ -43,7 +43,7 @@ set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK3588/Linux/librknn_api)
 
 # 修改平台选择，固定位linux
 set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
-# 引入文件夹
+# 引入rknn api头文件
 include_directories(${RKNN_API_PATH}/include)
 include_directories(${CMAKE_SOURCE_DIR}/../3rdparty)
 
