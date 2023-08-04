@@ -64,6 +64,7 @@ CMAKE_BINARY_DIR = /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build
 
 # The main recursive "all" target.
 all: CMakeFiles/rknn_yolov5_demo.dir/all
+all: CMakeFiles/rknn_yolov5_camera.dir/all
 all: CMakeFiles/rknn_yolov5_video_demo.dir/all
 .PHONY : all
 
@@ -73,6 +74,7 @@ preinstall:
 
 # The main recursive "clean" target.
 clean: CMakeFiles/rknn_yolov5_demo.dir/clean
+clean: CMakeFiles/rknn_yolov5_camera.dir/clean
 clean: CMakeFiles/rknn_yolov5_video_demo.dir/clean
 .PHONY : clean
 
@@ -83,7 +85,7 @@ clean: CMakeFiles/rknn_yolov5_video_demo.dir/clean
 CMakeFiles/rknn_yolov5_demo.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rknn_yolov5_demo.dir/build.make CMakeFiles/rknn_yolov5_demo.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rknn_yolov5_demo.dir/build.make CMakeFiles/rknn_yolov5_demo.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles --progress-num=1,2,3 "Built target rknn_yolov5_demo"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles --progress-num=4,5,6 "Built target rknn_yolov5_demo"
 .PHONY : CMakeFiles/rknn_yolov5_demo.dir/all
 
 # Build rule for subdir invocation for target.
@@ -103,13 +105,39 @@ CMakeFiles/rknn_yolov5_demo.dir/clean:
 .PHONY : CMakeFiles/rknn_yolov5_demo.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/rknn_yolov5_camera.dir
+
+# All Build rule for target.
+CMakeFiles/rknn_yolov5_camera.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rknn_yolov5_camera.dir/build.make CMakeFiles/rknn_yolov5_camera.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rknn_yolov5_camera.dir/build.make CMakeFiles/rknn_yolov5_camera.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles --progress-num=1,2,3 "Built target rknn_yolov5_camera"
+.PHONY : CMakeFiles/rknn_yolov5_camera.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/rknn_yolov5_camera.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/rknn_yolov5_camera.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles 0
+.PHONY : CMakeFiles/rknn_yolov5_camera.dir/rule
+
+# Convenience name for target.
+rknn_yolov5_camera: CMakeFiles/rknn_yolov5_camera.dir/rule
+.PHONY : rknn_yolov5_camera
+
+# clean rule for target.
+CMakeFiles/rknn_yolov5_camera.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rknn_yolov5_camera.dir/build.make CMakeFiles/rknn_yolov5_camera.dir/clean
+.PHONY : CMakeFiles/rknn_yolov5_camera.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/rknn_yolov5_video_demo.dir
 
 # All Build rule for target.
 CMakeFiles/rknn_yolov5_video_demo.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rknn_yolov5_video_demo.dir/build.make CMakeFiles/rknn_yolov5_video_demo.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rknn_yolov5_video_demo.dir/build.make CMakeFiles/rknn_yolov5_video_demo.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles --progress-num=4,5,6,7,8,9 "Built target rknn_yolov5_video_demo"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles --progress-num=7,8,9,10,11,12 "Built target rknn_yolov5_video_demo"
 .PHONY : CMakeFiles/rknn_yolov5_video_demo.dir/all
 
 # Build rule for subdir invocation for target.

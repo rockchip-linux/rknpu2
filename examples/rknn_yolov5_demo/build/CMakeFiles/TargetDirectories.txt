@@ -1,4 +1,5 @@
 /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles/rknn_yolov5_demo.dir
+/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles/rknn_yolov5_camera.dir
 /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles/rknn_yolov5_video_demo.dir
 /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles/edit_cache.dir
 /home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build/CMakeFiles/rebuild_cache.dir

@@ -209,6 +209,9 @@ CMAKE_STRIP:FILEPATH=/usr/bin/aarch64-linux-gnu-strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//The directory containing a CMake configuration file for OpenCV.
+OpenCV_DIR:PATH=/usr/lib/aarch64-linux-gnu/cmake/opencv4
+
 //Value Computed by CMake
 rknn_yolov5_demo_BINARY_DIR:STATIC=/home/pi/code/github/rknpu2/examples/rknn_yolov5_demo/build
 
@@ -367,5 +370,5 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding OpenCV
-FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/home/pi/code/github/rknpu2/examples/3rdparty/opencv/opencv-linux-aarch64][v3.4.5()]
+FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/usr][v4.5.4()]
 

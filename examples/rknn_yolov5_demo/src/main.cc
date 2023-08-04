@@ -27,6 +27,8 @@
 #include "im2d.h"
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgcodecs.hpp"
+//#include "opencv2/videoio.hpp"
+
 #include "opencv2/imgproc.hpp"
 #include "postprocess.h"
 #include "rga.h"
@@ -156,6 +158,7 @@ int main(int argc, char** argv)
     printf("cv::imread %s fail!\n", image_name);
     return -1;
   }
+  // cv::VideoCapture capture;
   cv::Mat img;
   cv::cvtColor(orig_img, img, cv::COLOR_BGR2RGB);
   img_width  = img.cols;
