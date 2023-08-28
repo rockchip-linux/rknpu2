@@ -11,7 +11,8 @@ if __name__ == '__main__':
     exp = 'yolov5s'
     Width = 640
     Height = 640
-    MODEL_PATH = './onnx_models/yolov5s_rm_transpose.onnx'
+    # Model from https://github.com/airockchip/rknn_model_zoo
+    MODEL_PATH = './onnx_models/yolov5s_relu.onnx'
     NEED_BUILD_MODEL = True
     # NEED_BUILD_MODEL = False
     im_file = './dog_bike_car_640x640.jpg'
@@ -20,7 +21,7 @@ if __name__ == '__main__':
     rknn = RKNN()
 
     OUT_DIR = "rknn_models"
-    RKNN_MODEL_PATH = './{}/{}_rm_transpose_{}.rknn'.format(
+    RKNN_MODEL_PATH = './{}/{}_{}.rknn'.format(
         OUT_DIR, exp+'-'+str(Width)+'-'+str(Height), platform)
     if NEED_BUILD_MODEL:
         DATASET = './dataset.txt'
@@ -55,4 +56,3 @@ if __name__ == '__main__':
         ret = rknn.load_rknn(RKNN_MODEL_PATH)
 
     rknn.release()
-

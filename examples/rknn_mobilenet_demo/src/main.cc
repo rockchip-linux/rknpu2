@@ -125,12 +125,13 @@ int main(int argc, char** argv)
   }
 
   cv::Mat orig_img_rgb;
+  //rknn模型说明来源于RKNN-Toolkit2的的examples/tflite/mobilenet_v1示例，输入通道顺序与python代码保持一致
   cv::cvtColor(orig_img, orig_img_rgb, cv::COLOR_BGR2RGB);
 
   cv::Mat img = orig_img_rgb.clone();
   if (orig_img.cols != MODEL_IN_WIDTH || orig_img.rows != MODEL_IN_HEIGHT) {
     printf("resize %d %d to %d %d\n", orig_img.cols, orig_img.rows, MODEL_IN_WIDTH, MODEL_IN_HEIGHT);
-    cv::resize(orig_img, img, cv::Size(MODEL_IN_WIDTH, MODEL_IN_HEIGHT), 0, 0, cv::INTER_LINEAR);
+    cv::resize(orig_img_rgb, img, cv::Size(MODEL_IN_WIDTH, MODEL_IN_HEIGHT), 0, 0, cv::INTER_LINEAR);
   }
 
   // Load RKNN Model

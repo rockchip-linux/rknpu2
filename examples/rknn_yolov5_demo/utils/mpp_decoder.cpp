@@ -6,8 +6,8 @@
 #include <pthread.h>
 #include <sys/syscall.h>
 
-// #define LOGD printf
-#define LOGD 
+#define LOGD printf
+// #define LOGD
 
 static unsigned long GetCurrentTimeMS() {
     struct timeval tv;
@@ -124,12 +124,12 @@ int MppDecoder::Decode(uint8_t* pkt_data, int pkt_size, int pkt_eos)
     MPP_RET ret = MPP_OK;
     MppCtx ctx  = data->ctx;
     MppApi *mpi = data->mpi;
-    
+
     size_t read_size = 0;
     size_t packet_size = data->packet_size;
 
     LOGD("receive packet size=%d ", pkt_size);
-   
+
     if (packet == NULL) {
         ret = mpp_packet_init(&packet, NULL, 0);
     }
@@ -144,7 +144,7 @@ int MppDecoder::Decode(uint8_t* pkt_data, int pkt_size, int pkt_eos)
     if (pkt_eos)
         mpp_packet_set_eos(packet);
     do {
-       
+
         RK_S32 times = 5;
         // send the packet first if packet is not done
         if (!pkt_done) {
@@ -167,12 +167,12 @@ int MppDecoder::Decode(uint8_t* pkt_data, int pkt_size, int pkt_eos)
                 }
                 LOGD("decode_get_frame failed too much time ");
             }
-           
+
             if (MPP_OK != ret) {
                 LOGD("decode_get_frame failed ret %d ", ret);
                 break;
             }
-           
+
             if (frame) {
                 RK_U32 hor_stride = mpp_frame_get_hor_stride(frame);
                 RK_U32 ver_stride = mpp_frame_get_ver_stride(frame);
@@ -182,7 +182,7 @@ int MppDecoder::Decode(uint8_t* pkt_data, int pkt_size, int pkt_eos)
                 RK_S64 pts = mpp_frame_get_pts(frame);
                 RK_S64 dts = mpp_frame_get_dts(frame);
 
-                LOGD("decoder require buffer w:h [%d:%d] stride [%d:%d] buf_size %d pts=%ld dts=%ld ",
+                LOGD("decoder require buffer w:h [%d:%d] stride [%d:%d] buf_size %d pts=%lld dts=%lld ",
                         hor_width, ver_height, hor_stride, ver_stride, buf_size, pts, dts);
 
                 if (mpp_frame_get_info_change(frame)) {

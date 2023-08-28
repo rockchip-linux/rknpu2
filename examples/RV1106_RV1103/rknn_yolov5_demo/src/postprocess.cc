@@ -211,8 +211,7 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
 
     int validCount = 0;
     int grid_len = grid_h * grid_w;
-    float thres = unsigmoid(threshold);
-    int8_t thres_i8 = qnt_f32_to_affine(thres, zp, scale);
+    int8_t thres_i8 = qnt_f32_to_affine(threshold, zp, scale);
     for (int a = 0; a < 3; a++)
     {
         for (int i = 0; i < grid_h; i++)
@@ -224,10 +223,10 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
                 {
                     int offset = (PROP_BOX_SIZE * a) * grid_len + i * grid_w + j;
                     int8_t *in_ptr = input + offset;
-                    float box_x = sigmoid(deqnt_affine_to_f32(*in_ptr, zp, scale)) * 2.0 - 0.5;
-                    float box_y = sigmoid(deqnt_affine_to_f32(in_ptr[grid_len], zp, scale)) * 2.0 - 0.5;
-                    float box_w = sigmoid(deqnt_affine_to_f32(in_ptr[2 * grid_len], zp, scale)) * 2.0;
-                    float box_h = sigmoid(deqnt_affine_to_f32(in_ptr[3 * grid_len], zp, scale)) * 2.0;
+                    float box_x = (deqnt_affine_to_f32(*in_ptr, zp, scale)) * 2.0 - 0.5;
+                    float box_y = (deqnt_affine_to_f32(in_ptr[grid_len], zp, scale)) * 2.0 - 0.5;
+                    float box_w = (deqnt_affine_to_f32(in_ptr[2 * grid_len], zp, scale)) * 2.0;
+                    float box_h = (deqnt_affine_to_f32(in_ptr[3 * grid_len], zp, scale)) * 2.0;
                     box_x = (box_x + j) * (float)stride;
                     box_y = (box_y + i) * (float)stride;
                     box_w = box_w * box_w * (float)anchor[a * 2];
@@ -251,7 +250,83 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
                         boxes.push_back(box_y);
                         boxes.push_back(box_w);
                         boxes.push_back(box_h);
-                        objProbs.push_back(sigmoid(deqnt_affine_to_f32(maxClassProbs, zp, scale))* sigmoid(deqnt_affine_to_f32(box_confidence, zp, scale)));
+                        objProbs.push_back((deqnt_affine_to_f32(maxClassProbs, zp, scale))* (deqnt_affine_to_f32(box_confidence, zp, scale)));
+                        classId.push_back(maxClassId);
+                        validCount++;
+                    }
+                }
+            }
+        }
+    }
+    return validCount;
+}
+
+
+static int process_native_nhwc(int8_t *input, int *anchor, int grid_h, int grid_w, int height, int width, int stride,
+                   std::vector<float> &boxes, std::vector<float> &boxScores, std::vector<int> &classId,
+                   float threshold, int32_t zp, float scale)
+{
+    int validCount = 0;
+    int8_t thres_i8 = qnt_f32_to_affine(threshold, zp, scale);
+
+    int anchor_per_branch = 3;
+    // 新驱动不再有对齐要求
+    // int align_c = get_align(PROP_BOX_SIZE*anchor_per_branch, 16);
+    int align_c = PROP_BOX_SIZE*anchor_per_branch;
+    // printf("align_c %d\n", align_c);
+
+    for (int h=0; h < grid_h; h++){
+        for (int w=0; w < grid_w; w++){
+            for (int a=0; a < anchor_per_branch; a++){
+                int hw_offset = h*grid_w*align_c + w*align_c + a*PROP_BOX_SIZE;
+                // int hw_offset = h*grid_w*anchor_per_branch*PROP_BOX_SIZE + w*anchor_per_branch*PROP_BOX_SIZE + a*PROP_BOX_SIZE;
+                int8_t *hw_ptr = input + hw_offset;
+                int8_t box_confidence = hw_ptr[4];
+                
+                if (box_confidence >= thres_i8){
+                    // printf("box_conf %d, thres_i8 %d\n", box_confidence, thres_i8);
+
+                    int8_t maxClassProbs = hw_ptr[5];
+                    int maxClassId = 0;
+                    for (int k = 1; k < OBJ_CLASS_NUM; ++k)
+                    {
+                        int8_t prob = hw_ptr[5 + k];
+                        if (prob > maxClassProbs)
+                        {
+                            maxClassId = k;
+                            maxClassProbs = prob;
+                        }
+                    }
+
+                    // printf("box_conf %d, thres_i8 %d, maxClassProbs %d\n", box_confidence, thres_i8, maxClassProbs);
+                    float box_conf_f32 = deqnt_affine_to_f32(box_confidence, zp, scale);
+                    float class_prob_f32 = deqnt_affine_to_f32(maxClassProbs, zp, scale);
+                    float limit_score = box_conf_f32* class_prob_f32;
+
+                    if (limit_score > threshold){
+                        float box_x, box_y, box_w, box_h;
+
+                        box_x = deqnt_affine_to_f32(hw_ptr[0], zp, scale) * 2.0 - 0.5;
+                        box_y = deqnt_affine_to_f32(hw_ptr[1], zp, scale) * 2.0 - 0.5;
+                        box_w = deqnt_affine_to_f32(hw_ptr[2], zp, scale) * 2.0;
+                        box_h = deqnt_affine_to_f32(hw_ptr[3], zp, scale) * 2.0;
+                        box_w = box_w * box_w;
+                        box_h = box_h * box_h;
+
+
+                        box_x = (box_x + w) * (float)stride;
+                        box_y = (box_y + h) * (float)stride;
+                        box_w *= (float)anchor[a * 2];
+                        box_h *= (float)anchor[a * 2 + 1];
+
+                        box_x -= (box_w / 2.0);
+                        box_y -= (box_h / 2.0);
+
+                        boxes.push_back(box_x);
+                        boxes.push_back(box_y);
+                        boxes.push_back(box_w);
+                        boxes.push_back(box_h);
+                        boxScores.push_back(limit_score);
                         classId.push_back(maxClassId);
                         validCount++;
                     }
@@ -290,7 +365,7 @@ int post_process(int8_t *input0, int8_t *input1, int8_t *input2, int model_in_h,
     int grid_h0 = model_in_h / stride0;
     int grid_w0 = model_in_w / stride0;
     int validCount0 = 0;
-    validCount0 = process(input0, (int *)anchor0, grid_h0, grid_w0, model_in_h, model_in_w,
+    validCount0 = process_native_nhwc(input0, (int *)anchor0, grid_h0, grid_w0, model_in_h, model_in_w,
                           stride0, filterBoxes, objProbs, classId, conf_threshold, qnt_zps[0], qnt_scales[0]);
 
     // stride 16
@@ -298,7 +373,7 @@ int post_process(int8_t *input0, int8_t *input1, int8_t *input2, int model_in_h,
     int grid_h1 = model_in_h / stride1;
     int grid_w1 = model_in_w / stride1;
     int validCount1 = 0;
-    validCount1 = process(input1, (int *)anchor1, grid_h1, grid_w1, model_in_h, model_in_w,
+    validCount1 = process_native_nhwc(input1, (int *)anchor1, grid_h1, grid_w1, model_in_h, model_in_w,
                           stride1, filterBoxes, objProbs, classId, conf_threshold, qnt_zps[1], qnt_scales[1]);
 
     // stride 32
@@ -306,7 +381,7 @@ int post_process(int8_t *input0, int8_t *input1, int8_t *input2, int model_in_h,
     int grid_h2 = model_in_h / stride2;
     int grid_w2 = model_in_w / stride2;
     int validCount2 = 0;
-    validCount2 = process(input2, (int *)anchor2, grid_h2, grid_w2, model_in_h, model_in_w,
+    validCount2 = process_native_nhwc(input2, (int *)anchor2, grid_h2, grid_w2, model_in_h, model_in_w,
                           stride2, filterBoxes, objProbs, classId, conf_threshold, qnt_zps[2], qnt_scales[2]);
 
     int validCount = validCount0 + validCount1 + validCount2;

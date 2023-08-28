@@ -1,31 +1,32 @@
-# 简介
- - rknn_yolov5_android_apk_demo 是RK356X/RK3588上如何调用NPU的demo，该demo的基础模型是yolov5s
+# Introduction
+ - rknn_yolov5_android_apk_demo is the one showing how to deploy yolov5s model on the android apk on RK3566_RK3568, RK3562 or RK3588
 
 
 
-# 使用说明
+# Pre-requisite
 
- - 可以使用android studio 2021.2.1 （Windows）或者android studio 2021.3.1（Linux/macOS） 编译该工程
- - yolov5s.rknn是使用rknn toolkit2将yolov5s.onnx转换而来，具体转换方法参考rknn toolkit2的examples/onnx/yolov5
+ - Using the andorid studio 2021 1.2.1 or 1.3.1, higher version
+
+ - Yolov5s.rknn is required, which can be converted from yolov5s.onnx, which SiLU activation layer was replace with ReLU. The detail should refer to this link: https://github.com/airockchip/rknn_model_zoo/tree/main/models/CV/object_detection/yolo
+
+
+# Structure
+
+## The demo can be split into two parts:
+ - JAVA: com.rockchip.gpadc.demo: Reading camera inputs, and invoking jni interface to inferece and show the result
+
+ - JNI: The interface for invoking rknnrt to do the inference of model.
 
 
 
-# 代码说明
+# Permission
+  This demo requires the permission of Camera and Read/Write permission for EXTERNAL_STORAGE
 
-## 代码分为两大部分：
- - JAVA: com.rockchip.gpadc.demo: 读取camera输入，并调用jni进行inference，并将结果显示出来
-
- - JNI: 调用rknnrt进行实际inference
-
-   
-   
-# 权限
-   运行本程序需要Camera及EXTERNAL_STORAGE读写权限
-    
 
 # FAQ
 
-## 编译时出现“files found with path 'lib/arm64-v8a/xxx.so' from inputs:”类似错误
+## Compiling error like“files found with path 'lib/arm64-v8a/xxx.so' from inputs:”
+
 ```
 Execution failed for task ':app:mergeDebugNativeLibs'.
 > A failure occurred while executing com.android.build.gradle.internal.tasks.MergeNativeLibsTask$MergeNativeLibsTaskWorkAction
@@ -39,7 +40,7 @@ Execution failed for task ':app:mergeDebugNativeLibs'.
 > Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights.
 ```
-或者
+Alternatively,
 ```
 2 files found with path 'lib/arm64-v8a/xxx.so' from inputs:
  - rknn_yolov5_android_apk_demo/app/build/intermediates/merged_jni_libs/debug/out/arm64-v8a/librga.so
@@ -47,11 +48,11 @@ Execution failed for task ':app:mergeDebugNativeLibs'.
 If you are using jniLibs and CMake IMPORTED targets, see
 https://developer.android.com/r/tools/jniLibs-vs-imported-targets
 ```
-则需要添加 app/build.gradle中的"jniLibs.srcDirs = ['libs']"，具体原因参考“https://developer.android.com/r/tools/jniLibs-vs-imported-targets”
+This requires add the "jniLibs.srcDirs = ['libs']" on app/build.gradle file “https://developer.android.com/r/tools/jniLibs-vs-imported-targets”
 
 
 
-## app启动时，出现"E/SurfaceView: Exception configuring surface"的错误
+## During launch app，errors like "E/SurfaceView: Exception configuring surface"
 
 ```
 D/rkyolo: camera facing: 1
@@ -75,4 +76,4 @@ E/SurfaceView: Exception configuring surface
         at com.rockchip.gpadc.demo.MainActivity$TSurfaceHolderCallback.surfaceCreated(MainActivity.java:199)
 ```
 
-是因为app设置的分辨率该camera不支持，需要修改"app/src/main/java/com/rockchip/gpadc/demo/rga/HALDefine.java"中CAMERA_PREVIEW_WIDTH及CAMERA_PREVIEW_HEIGHT为摄像头支持的分辨率。
+This is casued by the unsupported camera resolution , modifying CAMERA_PREVIEW_WIDTH in "app/src/main/java/com/rockchip/gpadc/demo/rga/HALDefine.java" for supported resolution.

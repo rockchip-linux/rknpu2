@@ -1,16 +1,17 @@
-# onnx模型
+# onnx model
 
-* onnx_models/yolov5s_rm_transpose.onnx
-模型基于官方yolov5s基础魔改而来，与rknn-toolkit2工具SDK中examples/onnx/yolov5/yolov5s.onnx相同，用于rknpu2的examples/rknn_yolov5_demo
+* onnx_models/yolov5s_relu.onnx
 
-# 转换rknn模型
+The model comes from https://github.com/airockchip/rknn_model_zoo
 
-1. 将onnx2rknn.py以下的参数修改成对应的平台，例如RK3566_RK3568模型，修改为：
+# convert rknn model
 
-```C++
+1. Modify the following parameters of onnx2rknn.py to the corresponding platform, such as the RK3566_RK3568 model, modify as follows:
+
+```python
 platform="rk3566"
 ```
 
-2. 执行python onnx2rknn.py
+2. Execute python onnx2rknn.py
 
-3. rknn模型生成在rknn_models目录
+3. The rknn model is generated in the rknn_models directory

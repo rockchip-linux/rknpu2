@@ -1,6 +1,7 @@
-下述<TARGET_PLATFORM>是RV1106或RV1103
+The following <TARGET_PLATFORM> is RV1106 or RV1103
 
-# arm Linux Demo
+
+# Arm Linux Demo
 
 ## build
 

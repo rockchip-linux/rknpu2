@@ -147,8 +147,7 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
 
     int validCount = 0;
     int grid_len = grid_h * grid_w;
-    float thres = unsigmoid(threshold);
-    int8_t thres_i8 = qnt_f32_to_affine(thres, zp, scale);
+    int8_t thres_i8 = qnt_f32_to_affine(threshold, zp, scale);
     for (int a = 0; a < 3; a++)
     {
         for (int i = 0; i < grid_h; i++)
@@ -160,10 +159,10 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
                 {
                     int offset = (PROP_BOX_SIZE * a) * grid_len + i * grid_w + j;
                     int8_t *in_ptr = input + offset;
-                    float box_x = sigmoid(deqnt_affine_to_f32(*in_ptr, zp, scale)) * 2.0 - 0.5;
-                    float box_y = sigmoid(deqnt_affine_to_f32(in_ptr[grid_len], zp, scale)) * 2.0 - 0.5;
-                    float box_w = sigmoid(deqnt_affine_to_f32(in_ptr[2 * grid_len], zp, scale)) * 2.0;
-                    float box_h = sigmoid(deqnt_affine_to_f32(in_ptr[3 * grid_len], zp, scale)) * 2.0;
+                    float box_x = (deqnt_affine_to_f32(*in_ptr, zp, scale)) * 2.0 - 0.5;
+                    float box_y = (deqnt_affine_to_f32(in_ptr[grid_len], zp, scale)) * 2.0 - 0.5;
+                    float box_w = (deqnt_affine_to_f32(in_ptr[2 * grid_len], zp, scale)) * 2.0;
+                    float box_h = (deqnt_affine_to_f32(in_ptr[3 * grid_len], zp, scale)) * 2.0;
                     box_x = (box_x + j) * (float)stride;
                     box_y = (box_y + i) * (float)stride;
                     box_w = box_w * box_w * (float)anchor[a * 2];
@@ -189,7 +188,7 @@ static int process(int8_t *input, int *anchor, int grid_h, int grid_w, int heigh
                         boxes.push_back(box_y);
                         boxes.push_back(box_w);
                         boxes.push_back(box_h);
-                        objProbs.push_back(sigmoid(max_class_prob * box_prob));
+                        objProbs.push_back((max_class_prob * box_prob));
                         classId.push_back(maxClassId);
                         validCount++;
                     }

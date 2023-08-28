@@ -1,12 +1,12 @@
-rknn_benchmark is used to test the performance of the rknn model. Please make sure that the cpu/ddr/npu has been clocked to the highest frequency before testing. 
+rknn_benchmark is used to test the performance of the rknn model. Please make sure that the cpu/ddr/npu has been clocked to the highest frequency before testing.
 
 Usage:
 
 ./rknn_benchmark xxx.rknn [input_data]  [loop_count] [core_mask]
 
-core_mask: 0: auto, 1: npu core1, 2: npu core2, 4:npu core3, 
+core_mask: 0: auto, 1: npu core1, 2: npu core2, 4:npu core3,
 
-​                     3: npu core1&2, 
+​                     3: npu core1&2,
 
 ​                     7: npu core1&2&3
 
@@ -22,7 +22,7 @@ Such as:
 ```
 
 
-The following <TARGET_PLATFORM> represents RK356X or RK3588
+The following <TARGET_PLATFORM> represents RK3566_RK3568, RK3562 or RK3588
 
 # Aarch64 Linux Demo
 ## Build

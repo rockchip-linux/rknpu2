@@ -222,7 +222,7 @@ static int init_model(const char* model_path, rknn_app_context_t* app_ctx) {
 }
 
 static int release_model(rknn_app_context_t* app_ctx) {
-  if (app_ctx->rknn_ctx != NULL) {
+  if (app_ctx->rknn_ctx != 0) {
     rknn_destroy(app_ctx->rknn_ctx);
   }
   free(app_ctx->input_attrs);

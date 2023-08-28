@@ -147,65 +147,6 @@ static unsigned char *load_image(const char *image_path, rknn_tensor_attr *input
   return image_data;
 }
 
-// 量化模型的npu输出结果为int8数据类型，后处理要按照int8数据类型处理
-// 如下提供了int8排布的NC1HWC2转换成int8的nchw转换代码
-int NC1HWC2_int8_to_NCHW_int8(const int8_t *src, int8_t *dst, int *dims, int channel, int h, int w)
-{
-  int batch = dims[0];
-  int C1 = dims[1];
-  int C2 = dims[4];
-  int hw_src = dims[2] * dims[3];
-  int hw_dst = h * w;
-  for (int i = 0; i < batch; i++)
-  {
-    src = src + i * C1 * hw_src * C2;
-    dst = dst + i * channel * hw_dst;
-    for (int c = 0; c < channel; ++c)
-    {
-      int plane = c / C2;
-      const int8_t *src_c = plane * hw_src * C2 + src;
-      int offset = c % C2;
-      for (int cur_h = 0; cur_h < h; ++cur_h)
-        for (int cur_w = 0; cur_w < w; ++cur_w)
-        {
-          int cur_hw = cur_h * w + cur_w;
-          dst[c * hw_dst + cur_h * w + cur_w] = src_c[C2 * cur_hw + offset];
-        }
-    }
-  }
-
-  return 0;
-}
-
-// 量化模型的npu输出结果为int8数据类型，后处理要按照int8数据类型处理
-// 如下提供了int8排布的NC1HWC2转换成float的nchw转换代码
-int NC1HWC2_int8_to_NCHW_float(const int8_t *src, float *dst, int *dims, int channel, int h, int w, int zp, float scale)
-{
-  int batch = dims[0];
-  int C1 = dims[1];
-  int C2 = dims[4];
-  int hw_src = dims[2] * dims[3];
-  int hw_dst = h * w;
-  for (int i = 0; i < batch; i++)
-  {
-    src = src + i * C1 * hw_src * C2;
-    dst = dst + i * channel * hw_dst;
-    for (int c = 0; c < channel; ++c)
-    {
-      int plane = c / C2;
-      const int8_t *src_c = plane * hw_src * C2 + src;
-      int offset = c % C2;
-      for (int cur_h = 0; cur_h < h; ++cur_h)
-        for (int cur_w = 0; cur_w < w; ++cur_w)
-        {
-          int cur_hw = cur_h * w + cur_w;
-          dst[c * hw_dst + cur_h * w + cur_w] = (src_c[C2 * cur_hw + offset] - zp) * scale; // int8-->float
-        }
-    }
-  }
-
-  return 0;
-}
 
 /*-------------------------------------------
                   Main Functions
@@ -299,7 +240,7 @@ int main(int argc, char *argv[])
   {
     output_attrs[i].index = i;
     // query info
-    ret = rknn_query(ctx, RKNN_QUERY_NATIVE_OUTPUT_ATTR, &(output_attrs[i]), sizeof(rknn_tensor_attr));
+    ret = rknn_query(ctx, RKNN_QUERY_NATIVE_NHWC_OUTPUT_ATTR, &(output_attrs[i]), sizeof(rknn_tensor_attr));
     if (ret != RKNN_SUCC)
     {
       printf("rknn_query fail! ret=%d\n", ret);
@@ -408,39 +349,6 @@ int main(int argc, char *argv[])
     printf("%4d: Elapse Time = %.2fms, FPS = %.2f\n", i, elapse_us / 1000.f, 1000.f * 1000.f / elapse_us);
   }
 
-  printf("output origin tensors:\n");
-  rknn_tensor_attr orig_output_attrs[io_num.n_output];
-  memset(orig_output_attrs, 0, io_num.n_output * sizeof(rknn_tensor_attr));
-  for (uint32_t i = 0; i < io_num.n_output; i++)
-  {
-    orig_output_attrs[i].index = i;
-    // query info
-    ret = rknn_query(ctx, RKNN_QUERY_OUTPUT_ATTR, &(orig_output_attrs[i]), sizeof(rknn_tensor_attr));
-    if (ret != RKNN_SUCC)
-    {
-      printf("rknn_query fail! ret=%d\n", ret);
-      return -1;
-    }
-    dump_tensor_attr(&orig_output_attrs[i]);
-  }
-
-  int8_t *output_mems_nchw[io_num.n_output];
-  for (uint32_t i = 0; i < io_num.n_output; ++i)
-  {
-    int size = orig_output_attrs[i].size_with_stride;
-    output_mems_nchw[i] = (int8_t *)malloc(size);
-  }
-
-  for (uint32_t i = 0; i < io_num.n_output; i++)
-  {
-    int channel = orig_output_attrs[i].dims[1];
-    int h = orig_output_attrs[i].n_dims > 2 ? orig_output_attrs[i].dims[2] : 1;
-    int w = orig_output_attrs[i].n_dims > 3 ? orig_output_attrs[i].dims[3] : 1;
-    int hw = h * w;
-    NC1HWC2_int8_to_NCHW_int8((int8_t *)output_mems[i]->virt_addr, (int8_t *)output_mems_nchw[i], (int *)output_attrs[i].dims,
-                              channel, h, w);
-  }
-
   int model_width = 0;
   int model_height = 0;
   if (input_attrs[0].fmt == RKNN_TENSOR_NCHW)
@@ -468,7 +376,7 @@ int main(int argc, char *argv[])
     out_zps.push_back(output_attrs[i].zp);
   }
 
-  post_process((int8_t *)output_mems_nchw[0], (int8_t *)output_mems_nchw[1], (int8_t *)output_mems_nchw[2], 640, 640,
+  post_process((int8_t *)output_mems[0]->virt_addr, (int8_t *)output_mems[1]->virt_addr, (int8_t *)output_mems[2]->virt_addr, 640, 640,
                box_conf_threshold, nms_threshold, scale_w, scale_h, out_zps, out_scales, &detect_result_group);
 
   char text[256];
@@ -487,7 +395,6 @@ int main(int argc, char *argv[])
   for (uint32_t i = 0; i < io_num.n_output; ++i)
   {
     rknn_destroy_mem(ctx, output_mems[i]);
-    free(output_mems_nchw[i]);
   }
 
   // destroy

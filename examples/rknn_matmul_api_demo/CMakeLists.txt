@@ -33,15 +33,15 @@ include_directories(${RKNN_API_PATH}/include)
 
 set(CMAKE_INSTALL_RPATH "lib")
 
-# rknn_matmul_demo
-add_executable(rknn_matmul_demo
-  src/rknn_matmul_demo.cpp
+# rknn_matmul_api_demo
+add_executable(rknn_matmul_api_demo
+  src/rknn_matmul_api_demo.cpp
 )
 
-target_link_libraries(rknn_matmul_demo
+target_link_libraries(rknn_matmul_api_demo
   ${RKNN_RT_LIB}
 )
 # install target and libraries
-set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_matmul_demo_${CMAKE_SYSTEM_NAME})
-install(TARGETS rknn_matmul_demo DESTINATION ./)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_matmul_api_demo_${CMAKE_SYSTEM_NAME})
+install(TARGETS rknn_matmul_api_demo DESTINATION ./)
 install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)

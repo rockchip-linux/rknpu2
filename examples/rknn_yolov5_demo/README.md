@@ -1,40 +1,39 @@
 # Yolo-v5 demo
 
-## 导出rknn模型
+## Guide for exporting rknn model
 
-请参考 https://github.com/airockchip/rknn_model_zoo/tree/main/models/vision/object_detection/yolov5-pytorch
+Please refer to this link:  https://github.com/airockchip/rknn_model_zoo/tree/main/models/CV/object_detection/yolo
 
+## Precautions
 
-
-## 注意事项
-
-1. 使用rknn-toolkit2版本大于等于1.1.2。
-2. 切换成自己训练的模型时，请注意对齐anchor等后处理参数，否则会导致后处理解析出错。
-3. 官网和rk预训练模型都是检测80类的目标，如果自己训练的模型,需要更改include/postprocess.h中的OBJ_CLASS_NUM以及NMS_THRESH,BOX_THRESH后处理参数。
-5. demo需要librga.so的支持,编译使用请参考https://github.com/rockchip-linux/linux-rga
-5. 由于硬件限制，该demo的模型默认把 yolov5 模型的后处理部分，移至cpu实现。本demo附带的模型均使用relu为激活函数，相比silu激活函数精度略微下降，性能大幅上升。
-
+1. Use rknn-toolkit2 version greater than or equal to **1.4.0**.
+2. When using the model trained by yourself, please pay attention to aligning post-processing parameters such as anchor, otherwise it will cause post-processing analysis errors.
+3. The official website and rk pre-training models both detect 80 types of targets. If you train your own model, you need to change the OBJ_CLASS_NUM and NMS_THRESH, BOX_THRESH post-processing parameters in include/postprocess.h.
+4. The demo needs the support of librga.so, please refer to https://github.com/airockchip/librga for compiling and using
+5. Due to hardware limitations, the demo model moves the post-processing part of the yolov5 model to the cpu implementation by default. The models attached to this demo all use relu as the activation function. Compared with the silu activation function, the accuracy is slightly lower, and the performance is greatly improved.
 
 
 ## Android Demo
 
-### 编译
+### Compiling && Building
 
-根据指定平台修改 `build-android_<TARGET_PLATFORM>.sh`中的Android NDK的路径 `ANDROID_NDK_PATH`，<TARGET_PLATFORM>可以是RK356X或RK3588 例如修改成：
+According to the target platform, modifying the path for Android NDK on 'build-android_<TARGET_PLATFORM>.sh'
+
+for example,
 
 ```sh
 ANDROID_NDK_PATH=~/opt/tool_chain/android-ndk-r17
 ```
 
-然后执行：
+then, running this script：
 
 ```sh
 ./build-android_<TARGET_PLATFORM>.sh
 ```
 
-### 推送执行文件到板子
+### Push all build output file to the board
 
-连接板子的usb口到PC,将整个demo目录到 `/data`:
+Connecting the usb port to PC,  then pushing all demo files to the board,
 
 ```sh
 adb root
@@ -42,7 +41,7 @@ adb remount
 adb push install/rknn_yolov5_demo /data/
 ```
 
-### 运行
+### Running
 
 ```sh
 adb shell
@@ -54,34 +53,34 @@ export LD_LIBRARY_PATH=./lib
 
 ## Aarch64 Linux Demo
 
-### 编译
+### Compiling && Building
 
-根据指定平台修改 `build-linux_<TARGET_PLATFORM>.sh`中的交叉编译器所在目录的路径 `TOOL_CHAIN`，例如修改成
+According to the target platform, modifying the path for 'TOOL_CHAIN' on 'build-android_<TARGET_PLATFORM>.sh'
 
 ```sh
 export TOOL_CHAIN=~/opt/tool_chain/gcc-9.3.0-x86_64_aarch64-linux-gnu/host
 ```
 
-然后执行：
+then run the script：
 
 ```sh
 ./build-linux_<TARGET_PLATFORM>.sh
 ```
 
-### 推送执行文件到板子
+### Push all build output file to the board
 
 
-将 install/rknn_yolov5_demo_Linux 拷贝到板子的/userdata/目录.
+Push install/rknn_yolov5_demo_Linux to the board,
 
-- 如果使用rockchip的EVB板子，可以使用adb将文件推到板子上：
+- If using adb via the EVB board：
 
 ```
 adb push install/rknn_yolov5_demo_Linux /userdata/
 ```
 
-- 如果使用其他板子，可以使用scp等方式将install/rknn_yolov5_demo_Linux拷贝到板子的/userdata/目录
+- For other boards,  using the scp or other different approaches to push all files under install/rknn_yolov5_demo_Linux to '/userdata'
 
-### 运行
+### Running
 
 ```sh
 adb shell
@@ -98,31 +97,30 @@ Using the following commands to add to LD_LIBRARY_PATH.
 export LD_LIBRARY_PATH=./lib:<LOCATION_LIBRGA.SO>
 ```
 
-## 视频流Demo运行命令参考如下：
-- h264视频
+## Guide for Video Demo：
+- H264
 ```
 ./rknn_yolov5_video_demo model/<TARGET_PLATFORM>/yolov5s-640-640.rknn xxx.h264 264
 ```
-注意需要使用h264码流视频，可以使用如下命令转换得到：
+For converting to h264 via the ffmpeg ：
 ```
 ffmpeg -i xxx.mp4 -vcodec h264 out.h264
 ```
 
-- h265视频
+- H265
 ```
 ./rknn_yolov5_video_demo model/<TARGET_PLATFORM>/yolov5s-640-640.rknn xxx.hevc 265
 ```
-注意需要使用h265码流视频，可以使用如下命令转换得到：
+For converting to h265 via the ffmpeg ：
 ```
 ffmpeg -i xxx.mp4 -vcodec hevc out.hevc
 ```
-- rtsp视频流
+- RTSP
 ```
 ./rknn_yolov5_video_demo model/<TARGET_PLATFORM>/yolov5s-640-640.rknn <RTSP_URL> 265
 ```
 
-### 注意
+### Remark
 
-- 需要根据系统的rga驱动选择正确的librga库，具体依赖请参考： https://github.com/airockchip/librga
-- **rk3562 目前仅支持h264视频流**
-- **rtsp 视频流Demo仅在Linux系统上支持，Android上目前还不支持**
+- **RK3562 only supports h264 video stream **
+- **rtsp video stream only available on the Linux system **

@@ -1,15 +1,16 @@
 # rknn_internal_mem_reuse_demo
 
-## 说明
+## Description
 
-本工程主要用于**RKNN_FLAG_MEM_ALLOC_OUTSIDE** 及 **rknn_set_internal_mem**的使用演示。
+This project is mainly used to demonstrate the usage of **RKNN_FLAG_MEM_ALLOC_OUTSIDE** and **rknn_set_internal_mem**.
 
-RKNN_FLAG_MEM_ALLOC_OUTSIDE：主要有两方面的作用:
-- 所有内存均是用户自行分配，便于对整个系统内存进行统筹安排
-- 用于内存复用，特别是针对RV1103/RV1106这种内存极为紧张的情况。
+RKNN_FLAG_MEM_ALLOC_OUTSIDE has two main purposes:
 
+- All memory is allocated by the user, allowing for better overall memory management.
+- It enables memory reuse, especially for memory-constrained chips like RV1103/RV1106.
 
-假设有模型A、B 两个模型，这两个模型在设计上串行运行的，那么这两个模型的中间tensor的内存就可以复用。示例代码如下：
+Assuming there are two models, Model A and Model B, designed to run sequentially, the intermediate tensor memory between these two models can be reused. The example code is as follows:
+
 ```
 rknn_context ctx_a, ctx_b;
 
@@ -31,40 +32,36 @@ internal_mem_b = rknn_create_mem_from_fd(ctx_b, internal_mem_max->fd,
 rknn_set_internal_mem(ctx_b, internal_mem_b);
 ```
 
-
-
-注意：本工程使用了上级目录的rknn_mobilenet_demo及rknn_yolov5_demo两个工程的rknn模型，编译之前请确保其存在。
+Note: This demo uses the RKNN models from the rknn_mobilenet_demo and rknn_yolov5_demo example	 in the parent directory. Make sure they exist before compiling.
 
 ## Android Demo
 
-### 编译
+### Compilation
 
-根据指定平台修改 `build-android_<TARGET_PLATFORM>.sh`中的Android NDK的路径 `ANDROID_NDK_PATH`，<TARGET_PLATFORM>可以是RK356X或RK3588 例如修改成：
+Modify the `build-android_<TARGET_PLATFORM>.sh` script based on the target platform, and set the Android NDK path in `ANDROID_NDK_PATH`. For example, if the target platform is RK3566_RK3568, RK3562 or RK3588, modify it as follows:
 
-```sh
+```
 ANDROID_NDK_PATH=~/opt/tool_chain/android-ndk-r17
 ```
 
-然后执行：
+Then execute:
 
-```sh
+```
 ./build-android_<TARGET_PLATFORM>.sh
 ```
 
-### 推送执行文件到板子
+### Pushing the Executable to the Device
 
-连接板子的usb口到PC,将整个demo目录到 `/data`:
+Connect the device to the PC via USB and push the entire demo directory to `/data`:
 
-```sh
-adb root
+```
 adb remount
 adb push install/rknn_internal_mem_reuse_demo_Android /data/
 ```
 
-### 运行
+### Execution
 
-```sh
-adb shell
+```
 cd /data/rknn_internal_mem_reuse_demo_Android/
 
 export LD_LIBRARY_PATH=./lib
@@ -73,40 +70,39 @@ export LD_LIBRARY_PATH=./lib
 
 ## Aarch64 Linux Demo
 
-### 编译
+### Compilation
 
-根据指定平台修改 `build-linux_<TARGET_PLATFORM>.sh`中的交叉编译器所在目录的路径 `GCC_COMPILER`，例如修改成
+Modify the `build-linux_<TARGET_PLATFORM>.sh` script based on the target platform and set the path of the cross-compiler directory in `GCC_COMPILER`. For example:
 
-```sh
+```
 export GCC_COMPILER=prebuilts/gcc/linux-x86/aarch64/gcc-buildroot-9.3.0-2020.03-x86_64_aarch64-rockchip-linux-gnu/bin/aarch64-linux
 ```
 
-然后执行：
+Then execute:
 
-```sh
+```
 ./build-linux_<TARGET_PLATFORM>.sh
 ```
 
-### 推送执行文件到板子
+### Pushing the Executable to the Device
 
+Copy the `install/rknn_internal_mem_reuse_demo_Linux` to the `/userdata/` directory on the target device.
 
-将 install/rknn_internal_mem_reuse_demo_Linux 拷贝到板子的/userdata/目录.
-
-- 如果使用rockchip的EVB板子，可以使用adb将文件推到板子上：
+- If using a Rockchip EVB board, use adb to push the file to the device:
 
 ```
+bashCopy code
 adb push install/rknn_internal_mem_reuse_demo_Linux /userdata/
 ```
 
-- 如果使用其他板子，可以使用scp等方式将install/rknn_internal_mem_reuse_demo_Linux拷贝到板子的/userdata/目录
+- If using other board, use scp or other methods to copy `install/rknn_internal_mem_reuse_demo_Linux` to the `/userdata/` directory on the device.
 
-### 运行
+### Execution
 
-```sh
+```
 adb shell
 cd /userdata/rknn_internal_mem_reuse_demo_Linux/
 
 export LD_LIBRARY_PATH=./lib
 ./rknn_internal_mem_reuse_demo model/<TARGET_PLATFORM>/yolov5s-640-640.rknn model/bus.jpg model/<TARGET_PLATFORM>/mobilenet_v1.rknn model/cat_224x224.jpg
 ```
-

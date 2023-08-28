@@ -7,7 +7,7 @@
 #define MPP_ALIGN(x, a)         (((x)+(a)-1)&~((a)-1))
 #define SZ_4K 4096
 #define LOGD printf
-// #define LOGD 
+// #define LOGD
 #define LOGE printf
 
 int MppEncoder::InitParams(MppEncoderParams& params)
@@ -455,6 +455,7 @@ MPP_TEST_OUT:
 
 int MppEncoder::SetCallback(MppEncoderFrameCallback callback) {
     this->callback = callback;
+    return 0;
 }
 
 int MppEncoder::GetHeader(char* enc_buf, int max_size) {

@@ -1,4 +1,4 @@
-The following <TARGET_PLATFORM> represents RK356X or RK3588.
+The following <TARGET_PLATFORM> represents RK3566_RK3568,RK3562 or RK3588.
 # Aarch64 Linux Demo
 ## Build
 

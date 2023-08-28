@@ -1,39 +1,40 @@
 # Yolo-v5 demo
 
-# 导出rknn模型
+# Export RKNN Model
 
-1. 进到examples/RV1106_RV1103/rknn_yolov5_demo/convert_rknn_demo/yolov5目录下，执行如下命令，可生成rknn模型:
+Please refer https://github.com/airockchip/rknn_model_zoo/tree/main/models/CV/object_detection/yolo
 
-```sh
-   cd examples/RV1106_RV1103/rknn_yolov5_demo/convert_rknn_demo/yolov5
-   python onnx2rknn.py
-```
 
-## arm Linux Demo
 
-### 编译
+## Arm Linux Demo
 
-RV1106/RV1103编译脚本均为 `build-linux_RV1106.sh`，设置交叉编译器所在目录的路径 `RK_RV1106_TOOLCHAIN`，例如修改成
+### Compiling and Building
+
+The 'build-linux_RV1106.sh' can be used for compiling demo for target including RV1106 and RV1103.
+
+Changing the cross compiler path via the setting the `RK_RV1106_TOOLCHAIN`, shown as below:
 
 ```sh
 export RK_RV1106_TOOLCHAIN=~/opts/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf
 ```
 
-然后执行：
+then, run the script：
 
 ```sh
 ./build-linux_RV1106.sh
 ```
 
-### 推送执行文件到板子
+Note: The RV1106 and RV1103 requires this 'arm-rockchip830-linux-uclibcgnueabihf' compiler to build the demo or another applications. 
 
-连接板子的usb口到PC,将整个demo目录到 `/userdata`:
+### Push build output files to the board
+
+Connecting the usb port to the PC, and pushing all demo folder to the directory '/userdata':
 
 ```sh
 adb push install/rknn_yolov5_demo_Linux /userdata/
 ```
 
-### 运行
+### Running 
 
 ```sh
 adb shell
@@ -43,4 +44,8 @@ export LD_LIBRARY_PATH=/userdata/rknn_yolov5_demo_Linux/lib
 ./rknn_yolov5_demo model/RV1106/yolov5s-640-640.rknn model/bus.jpg
 ```
 
-Note: LD_LIBRARY_PATH 必须采用全路径
+Note: 
+
+- LD_LIBRARY_PATH must use the full path
+- For performance reasons, the output fmt of the RKNN model is set to **RKNN_QUERY_NATIVE_NHWC_OUTPUT_ATTR** in the demo to obtain better inference performance. At this time, the model output buf is arranged in the order of NHWC. For example, the original shape of the first output is **1,255,80,80**. At this case, the shape output by RKNN is 1,80,80,255. The post-processing in this demo is also optimized and adjusted according to this order.
+

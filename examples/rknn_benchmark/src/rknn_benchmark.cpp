@@ -370,7 +370,7 @@ int main(int argc, char* argv[])
   if (input_paths_split.size() > 0) {
     // Load input
     if (io_num.n_input != input_paths_split.size()) {
-      printf("input missing!, need input number: %d, only get %d inputs\n", io_num.n_input, input_paths_split.size());
+      printf("input missing!, need input number: %d, only get %zu inputs\n", io_num.n_input, input_paths_split.size());
       goto out;
     }
     for (int i = 0; i < io_num.n_input; i++) {
@@ -392,7 +392,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  
+
   memset(inputs, 0, io_num.n_input * sizeof(rknn_input));
   for (int i = 0; i < io_num.n_input; i++) {
     inputs[i].index        = i;

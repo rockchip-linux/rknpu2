@@ -1,73 +1,69 @@
-# 说明
-Android平台有两种方式来调用RKNN API
-1）应用直接链接librknnrt.so
-2）应用链接Android平台HIDL实现的librknn_api_android.so
-对于需要通过CTS/VTS测试的Android设备可以使用基于Android平台HIDL实现的RKNN API。如果不需要通过CTS/VTS测试的设备建议直接链接使用librknnrt.so，对各个接口调用流程的链路更短，可以提供更好的性能。
+# Instructions
 
-对于使用Android HIDL实现的RKNN API的代码位于RK3566_RK3568/RK3588 Android系统SDK的vendor/rockchip/hardware/interfaces/neuralnetworks目录下。当完成Android系统编译后，将会生成一些NPU相关的库（对于应用只需要链接使用librknn_api_android.so即可）
+There are two ways to use the RKNN API on the Android platform:
 
-**本示例适用于librknn_api_android.so。**
+1. Directly link to librknnrt.so.
+2. Link to librknn_api_android.so, which is implemented based on Android platform HIDL.
 
+For Android devices that need to pass CTS/VTS testing, it is recommended to use the RKNN API implemented based on Android platform HIDL. If devices don't need to pass CTS/VTS testing, it is suggested to directly link and use librknnrt.so, which provides better performance due to shorter interface calling process.
 
+The code for using the RKNN API implemented with Android HIDL can be found in the vendor/rockchip/hardware/interfaces/neuralnetworks directory of the RK3566_RK3568/RK3588 Android system SDK. After completing the Android system compilation, some NPU-related libraries will be generated (for applications, only librknn_api_android.so needs to be linked).
 
-# 编译
+**This example is applicable to librknn_api_android.so.**
 
-- 编译librknn_api_android.so
+## Compilation
 
-    需要先下载RK3566_RK3568/RK3588 Android SDK，在Android SDK根目录执行
+- Compile librknn_api_android.so
 
-    ```
-    source build/envsetup.sh
-    lunch your target ##需要根据自己的实际情况进行选择
-    mmm vendor/rockchip/hardware/interfaces/neuralnetworks/ -j16
+  First, download the RK3566_RK3568/RK3588 Android SDK, and in the root directory of the Android SDK, then execute following commands:
 
-    ```
+  ```
+  source build/envsetup.sh
+  lunch your target ## Choose according to your actual situation
+  mmm vendor/rockchip/hardware/interfaces/neuralnetworks/ -j16
+  ```
 
-    将生成
+  The following files will be generated:
 
-    ```
-    /vendor/lib/librknn_api_android.so
-    /vendor/lib/librknnhal_bridge.rockchip.so
-    /vendor/lib64/librknn_api_android.so
-    /vendor/lib64/librknnhal_bridge.rockchip.so
-    /vendor/lib64/rockchip.hardware.neuralnetworks@1.0.so
-    /vendor/lib64/rockchip.hardware.neuralnetworks@1.0-adapter-helper.so
-    /vendor/lib64/hw/rockchip.hardware.neuralnetworks@1.0-impl.so
-    /vendor/bin/hw/rockchip.hardware.neuralnetworks@1.0-service
-    ```
+  ```
+  /vendor/lib/librknn_api_android.so
+  /vendor/lib/librknnhal_bridge.rockchip.so
+  /vendor/lib64/librknn_api_android.so
+  /vendor/lib64/librknnhal_bridge.rockchip.so
+  /vendor/lib64/rockchip.hardware.neuralnetworks@1.0.so
+  /vendor/lib64/rockchip.hardware.neuralnetworks@1.0-adapter-helper.so
+  /vendor/lib64/hw/rockchip.hardware.neuralnetworks@1.0-impl.so
+  /vendor/bin/hw/rockchip.hardware.neuralnetworks@1.0-service
+  ```
 
+- Compile this demo
 
--  编译本demo
+  Copy $RKNPU2_SDK to the root directory of the Android SDK, and execute:
 
-    将$RKNPU2_SDK拷贝到Android SDK根目录，并执行：
+  ```
+  mmm rknpu2/examples/librknn_api_android_demo
+  ```
 
-    ```
-    mmm rknpu2/examples/librknn_api_android_demo
-    ```
+  The following file will be generated:
 
-    将生成的vendor/bin/rknn_create_mem_demo
+  vendor/bin/rknn_create_mem_demo
 
-# 运行
+## Execution
 
-
-- 将rknn_create_mem_demo推到板子/vendor/bin/目录
-
-- 将model推到板子/data/目录
-
-- 确保板子的rockchip.hardware.neuralnetworks@1.0-service已经运行
+- Push rknn_create_mem_demo to the /vendor/bin/ directory of the target device.
+- Push the model to the /data/ directory of the target device.
+- Make sure that the [rockchip.hardware.neuralnetworks@1.0-service](mailto:rockchip.hardware.neuralnetworks@1.0-service) is running on the device.
 
 ```
-    rknn_create_mem_demo /data/model/RK3566_RK3568/mobilenet_v1.rknn /data/model/dog_224x224.jpg
+ rknn_create_mem_demo /data/model/RK3566_RK3568/mobilenet_v1.rknn /data/model/dog_224x224.jpg
 ```
 
+## FAQ
 
+- What should I do if the [rockchip.hardware.neuralnetworks@1.0-service](mailto:rockchip.hardware.neuralnetworks@1.0-service) is not running?
 
-# FAQ
+  If the service is not running, make sure that the vendor/rockchip/hardware/interfaces/neuralnetworks/ directory exists in the Android SDK, recompile the system firmware, and burn it onto the device. Please refer to the instructions for compiling the SDK firmware for specific steps.
 
-- rockchip.hardware.neuralnetworks@1.0-service服务没有运行怎么办
+- Encounter the error "sizeof(rknn_tensor_attr) != sizeof(::rockchip::hardware::neuralnetworks::V1_0::RKNNTensorAttr)"
 
-    如果该服务没有运行，从Android SDK确保vendor/rockchip/hardware/interfaces/neuralnetworks/目录存在，并且重新编译系统固件，并重新烧写到板子上，具体步骤请参考SDK编译固件的说明。
-
-- 遇到sizeof(rknn_tensor_attr) != sizeof(::rockchip::hardware::neuralnetworks::V1_0::RKNNTensorAttr)的错误
-
-    需要更新vendor/rockchip/hardware/interfaces/neuralnetworks到最新代码
+  You need to update the vendor/rockchip/hardware/interfaces/neuralnetworks to the latest version.

@@ -490,13 +490,12 @@ int main(int argc, char **argv)
             {
                 input_attrs[i].dims[j] = shape_range[i].dyn_range[s][j];
             }
-
-            ret = rknn_set_input_shape(ctx, &input_attrs[i]);
-            if (ret < 0)
-            {
-                fprintf(stderr, "rknn_set_input_shape error! ret=%d\n", ret);
-                return -1;
-            }
+        }
+        ret = rknn_set_input_shapes(ctx, io_num.n_input, input_attrs);
+        if (ret < 0)
+        {
+            fprintf(stderr, "rknn_set_input_shape error! ret=%d\n", ret);
+            return -1;
         }
 
         // 获取当前次推理的输入和输出形状
@@ -538,7 +537,7 @@ int main(int argc, char **argv)
         // 设置输入信息
         rknn_input inputs[io_num.n_input];
         memset(inputs, 0, io_num.n_input * sizeof(rknn_input));
-        std::vector<cv::Mat>  resize_imgs;
+        std::vector<cv::Mat> resize_imgs;
         resize_imgs.resize(io_num.n_input);
         for (int i = 0; i < io_num.n_input; i++)
         {
@@ -621,10 +620,11 @@ int main(int argc, char **argv)
 
 #if NPY_SUPPORT
         // save output
-        for (uint32_t i = 0; i < io_num.n_output; i++) {
+        for (uint32_t i = 0; i < io_num.n_output; i++)
+        {
             char output_path[PATH_MAX];
             sprintf(output_path, "%s/rt_output%d.npy", output_dir ? output_dir : ".", i);
-            save_npy<float>(output_path, (float*)output_mems[i]->virt_addr, &cur_output_attrs[i]);
+            save_npy<float>(output_path, (float *)output_mems[i]->virt_addr, &cur_output_attrs[i]);
         }
 #endif
 

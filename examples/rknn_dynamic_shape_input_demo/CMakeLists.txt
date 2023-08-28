@@ -5,6 +5,9 @@ project(rknn_dynshape_demo)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+# skip 3rd-party lib dependencies
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-shlib-undefined")
+
 # rknn api
 if(TARGET_SOC STREQUAL "rk356x")
   set(RKNN_API_PATH ${CMAKE_SOURCE_DIR}/../../runtime/RK356X/${CMAKE_SYSTEM_NAME}/librknn_api)
@@ -39,6 +42,22 @@ else()
 endif()
 find_package(OpenCV REQUIRED)
 
+# mmz
+set(MPI_MMZ_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rk_mpi_mmz)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+  set(MPI_MMZ_LIB ${MPI_MMZ_PATH}/lib/Android/${CMAKE_ANDROID_ARCH_ABI}/libmpimmz.so)
+else()
+  if(CMAKE_C_COMPILER MATCHES "aarch64")
+    set(LIB_ARCH aarch64)
+  else()
+    set(LIB_ARCH armhf)
+  endif()
+
+  set(MPI_MMZ_LIB ${MPI_MMZ_PATH}/lib/Linux//${LIB_ARCH}/libmpimmz.so)
+endif()
+include_directories(${MPI_MMZ_PATH}/include)
+
 #### cnpy
 set(CNPY_ROOT ${CMAKE_SOURCE_DIR}/../3rdparty/cnpy)
 include_directories(${CNPY_ROOT})
@@ -68,9 +87,28 @@ target_link_libraries(rknn_dynshape_inference_zero_copy
   ${OpenCV_LIBS}
 )
 # install target and libraries
-set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_dynshape_demo_${CMAKE_SYSTEM_NAME})
 install(TARGETS rknn_dynshape_inference_zero_copy DESTINATION ./)
 
 install(DIRECTORY model DESTINATION ./)
 install(DIRECTORY images DESTINATION ./)
 install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)
+
+
+
+# At present, mmz　demo is only available under Android, but not for Linux temporarily,
+# mainly because libmpimmz.so has no Linux implementation now. The API of the NPU itself supports Linux.
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+  # rknn_dynshape_inference_zero_copy_alloc_outside
+  add_executable(rknn_dynshape_inference_zero_copy_alloc_outside
+    src/rknn_dynshape_inference_zero_copy_alloc_outside.cc
+    ${CNPY_ROOT}/cnpy.cpp
+  )
+
+  target_link_libraries(rknn_dynshape_inference_zero_copy_alloc_outside
+    ${RKNN_RT_LIB}
+    ${MPI_MMZ_LIB}
+  )
+
+  # install target and libraries
+  install(TARGETS rknn_dynshape_inference_zero_copy_alloc_outside DESTINATION ./)
+endif()

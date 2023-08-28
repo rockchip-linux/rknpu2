@@ -20,7 +20,15 @@ Note:
 
 ## ReleaseLog
 
-# 1.5.0
+### 1.5.2
+- Improved dynamic shape support
+- Improved matmul api support
+- Add GPU back-end implementations for some operators such as matmul
+- Improve transformer support
+- Reduce rknn_init memory usage
+- Optimize rknn_init time-consuming
+
+### 1.5.0
 
 - Support RK3562
 - Support more NPU operator fuse, such as Conv-Silu/Conv-Swish/Conv-Hardswish/Conv-sigmoid/Conv-HardSwish/Conv-Gelu ..

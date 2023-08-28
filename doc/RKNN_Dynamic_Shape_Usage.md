@@ -48,7 +48,7 @@
 
 
 ## 4.设置输入形状
-加载动态形状输入RKNN模型后，您可以在运行时动态修改输入的形状。通过调用rknn_set_input_shape接口，传入包含形状信息的rknn_tensor_attr指针可以设置当前次推理的形状。例如，使用rknn_query获取的输入形状设置输入时，您可以使用以下代码：
+加载动态形状输入RKNN模型后，您可以在运行时动态修改输入的形状。通过调用rknn_set_input_shapes接口，传入所有输入的rknn_tensor_attr数组,可以设置当前次推理的形状。例如，使用rknn_query获取的输入形状设置输入时，您可以使用以下代码：
 
 ```
     for (int s = 0; s < shape_num; ++s)
@@ -59,17 +59,16 @@
             {
                 input_attrs[i].dims[j] = shape_range[i].dyn_range[s][j];
             }
-
-            ret = rknn_set_input_shape(ctx, &input_attrs[i]);
-            if (ret < 0)
-            {
-                fprintf(stderr, "rknn_set_input_shape error! ret=%d\n", ret);
-                return -1;
-            }
+        }
+        ret = rknn_set_input_shapes(ctx, io_num.n_input, input_attrs);
+        if (ret < 0)
+        {
+            fprintf(stderr, "rknn_set_input_shapes error! ret=%d\n", ret);
+            return -1;
         }
     }
 ```
-其中，shape_num是支持的形状个数，shape_range[i]是第i个输入的rknn_input_range结构体，input_attrs[i]是第i个输入的rknn_tensor_attr结构体。
+其中，shape_num是支持的形状个数，shape_range[i]是第i个输入的rknn_input_range结构体，io_num.n_input是输入数量,input_attrs是模型所有输入的rknn_tensor_attr结构体数组。
 
 在设置输入形状后，可以再次调用rknn_query查询当前次推理成功设置后的输入和输出形状，例如，您可以使用以下代码：
 ```
