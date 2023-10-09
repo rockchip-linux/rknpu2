@@ -15,7 +15,7 @@ set(CMAKE_SKIP_INSTALL_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
-if (CMAKE_C_COMPILER MATCHES "aarch64")
+if(CMAKE_C_COMPILER MATCHES "aarch64")
   set(LIB_ARCH aarch64)
 else()
   set(LIB_ARCH armhf)
@@ -32,17 +32,18 @@ else()
   message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588 or rv110x")
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
   set(RKNN_RT_LIB ${RKNN_API_PATH}/${CMAKE_ANDROID_ARCH_ABI}/librknnrt.so)
 else()
   set(RKNN_RT_LIB ${RKNN_API_PATH}/${LIB_ARCH}/librknnrt.so)
 endif()
+
 include_directories(${RKNN_API_PATH}/include)
 include_directories(${CMAKE_SOURCE_DIR}/../3rdparty)
 
 # opencv
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
-    set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/OpenCV-android-sdk/sdk/native/jni/abi-${CMAKE_ANDROID_ARCH_ABI})
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+  set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/OpenCV-android-sdk/sdk/native/jni/abi-${CMAKE_ANDROID_ARCH_ABI})
 else()
   if(LIB_ARCH STREQUAL "armhf")
     set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-armhf/share/OpenCV)
@@ -50,9 +51,10 @@ else()
     set(OpenCV_DIR ${CMAKE_SOURCE_DIR}/../3rdparty/opencv/opencv-linux-aarch64/share/OpenCV)
   endif()
 endif()
+
 find_package(OpenCV REQUIRED)
 
-#rga
+# rga
 if(TARGET_SOC STREQUAL "rk356x")
   set(RGA_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/rga/RK356X)
 elseif(TARGET_SOC STREQUAL "rk3588")
@@ -60,41 +62,47 @@ elseif(TARGET_SOC STREQUAL "rk3588")
 else()
   message(FATAL_ERROR "TARGET_SOC is not set, ref value: rk356x or rk3588")
 endif()
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
   set(RGA_LIB ${RGA_PATH}/lib/Android/${CMAKE_ANDROID_ARCH_ABI}/librga.so)
 else()
   set(RGA_LIB ${RGA_PATH}/lib/Linux//${LIB_ARCH}/librga.so)
 endif()
-include_directories( ${RGA_PATH}/include)
+
+include_directories(${RGA_PATH}/include)
 
 # mpp
 set(MPP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/mpp)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(MPP_LIBS ${MPP_PATH}/${CMAKE_SYSTEM_NAME}/${LIB_ARCH}/librockchip_mpp.so)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
   set(MPP_LIBS ${MPP_PATH}/${CMAKE_SYSTEM_NAME}/${CMAKE_ANDROID_ARCH_ABI}/libmpp.so)
 endif()
+
 include_directories(${MPP_PATH}/include)
 
 # zlmediakit
 set(ZLMEDIAKIT_PATH ${CMAKE_SOURCE_DIR}/../3rdparty/zlmediakit)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-include_directories(${ZLMEDIAKIT_PATH}/include)
-set(ZLMEDIAKIT_LIBS ${ZLMEDIAKIT_PATH}/${LIB_ARCH}/libmk_api.so)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  include_directories(${ZLMEDIAKIT_PATH}/include)
+  set(ZLMEDIAKIT_LIBS ${ZLMEDIAKIT_PATH}/${LIB_ARCH}/libmk_api.so)
 endif()
 
-if (ZLMEDIAKIT_LIBS)
-    add_definitions(-DBUILD_VIDEO_RTSP)
+if(ZLMEDIAKIT_LIBS)
+  add_definitions(-DBUILD_VIDEO_RTSP)
 endif()
 
 set(CMAKE_INSTALL_RPATH "lib")
 
 # rknn_yolov5_demo
-include_directories( ${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(rknn_yolov5_demo
-        src/main.cc
-        src/postprocess.cc
+  src/main.cc
+  src/preprocess.cc
+  src/postprocess.cc
 )
 
 target_link_libraries(rknn_yolov5_demo
@@ -103,23 +111,22 @@ target_link_libraries(rknn_yolov5_demo
   ${OpenCV_LIBS}
 )
 
-if (MPP_LIBS)
-add_executable(rknn_yolov5_video_demo
-        src/main_video.cc
-        src/postprocess.cc
-        utils/mpp_decoder.cpp
-        utils/mpp_encoder.cpp
-        utils/drawing.cpp
-)
-target_link_libraries(rknn_yolov5_video_demo
-  ${RKNN_RT_LIB}
-  ${RGA_LIB}
-  ${OpenCV_LIBS}
-  ${MPP_LIBS}
-  ${ZLMEDIAKIT_LIBS}
-)
+if(MPP_LIBS)
+  add_executable(rknn_yolov5_video_demo
+    src/main_video.cc
+    src/postprocess.cc
+    utils/mpp_decoder.cpp
+    utils/mpp_encoder.cpp
+    utils/drawing.cpp
+  )
+  target_link_libraries(rknn_yolov5_video_demo
+    ${RKNN_RT_LIB}
+    ${RGA_LIB}
+    ${OpenCV_LIBS}
+    ${MPP_LIBS}
+    ${ZLMEDIAKIT_LIBS}
+  )
 endif()
-
 
 # install target and libraries
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/rknn_yolov5_demo_${CMAKE_SYSTEM_NAME})
@@ -129,11 +136,11 @@ install(PROGRAMS ${RKNN_RT_LIB} DESTINATION lib)
 install(PROGRAMS ${RGA_LIB} DESTINATION lib)
 install(DIRECTORY model DESTINATION ./)
 
-if (MPP_LIBS)
-install(TARGETS rknn_yolov5_video_demo DESTINATION ./)
-install(PROGRAMS ${MPP_LIBS} DESTINATION lib)
+if(MPP_LIBS)
+  install(TARGETS rknn_yolov5_video_demo DESTINATION ./)
+  install(PROGRAMS ${MPP_LIBS} DESTINATION lib)
 endif()
 
-if (ZLMEDIAKIT_LIBS)
-install(PROGRAMS ${ZLMEDIAKIT_LIBS} DESTINATION lib)
+if(ZLMEDIAKIT_LIBS)
+  install(PROGRAMS ${ZLMEDIAKIT_LIBS} DESTINATION lib)
 endif()
