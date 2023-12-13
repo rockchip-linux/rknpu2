@@ -1,4 +1,11 @@
+# NOTE
+
+This project is no longer maintained and has been moved to https://github.com/airockchip/rknn-toolkit2/tree/master/rknpu2
+
+
+
 ## RKNPU2
+
   RKNPU2 provides an advanced interface to access Rockchip NPU.
 
 ## Support Platform
